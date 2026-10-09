@@ -1,0 +1,294 @@
+{
+  "name": "Kyle Lawhon",
+  "target_roles": [
+    {
+      "name": "IT Help Desk",
+      "title_keywords": [
+        "help desk",
+        "helpdesk",
+        "it support",
+        "desktop support",
+        "service desk"
+      ]
+    },
+    {
+      "name": "Junior QA / Software",
+      "title_keywords": [
+        "qa",
+        "tester",
+        "quality assurance",
+        "junior developer",
+        "software support"
+      ]
+    },
+    {
+      "name": "Junior Android / Mobile Developer",
+      "title_keywords": [
+        "android developer",
+        "mobile developer",
+        "junior android",
+        "android engineer",
+        "kotlin developer"
+      ]
+    }
+  ],
+  "skills": {
+    "demonstrated": [
+      "troubleshooting",
+      "diagnostics",
+      "python",
+      "android",
+      "kotlin",
+      "jetpack compose",
+      "kivy",
+      "android studio",
+      "gradle",
+      "git",
+      "github",
+      "linux",
+      "ubuntu",
+      "termux",
+      "shell",
+      "ssh",
+      "debugging",
+      "testing",
+      "hardware",
+      "electrical",
+      "customer service",
+      "bash",
+      "shell scripting",
+      "scripting",
+      "command line",
+      "cli"
+    ],
+    "learning": [
+      "networking",
+      "tcp/ip",
+      "dns",
+      "nmap",
+      "cybersecurity",
+      "burp suite",
+      "api testing",
+      "osint",
+      "ctf",
+      "incident response",
+      "vpn",
+      "active directory"
+    ]
+  },
+  "transferable_skills": [
+    "diagnostics",
+    "root cause",
+    "documentation",
+    "technical support",
+    "troubleshooting",
+    "maintenance",
+    "preventive maintenance",
+    "quality assurance",
+    "problem solving",
+    "electrical",
+    "inventory",
+    "customer communication"
+  ],
+  "adjacent_title_keywords": [
+    "field service",
+    "technical support",
+    "application support",
+    "product support",
+    "implementation",
+    "quality",
+    "support engineer",
+    "support specialist",
+    "support analyst",
+    "support technician",
+    "customer support"
+  ],
+  "caution_requirements": [
+    "security clearance",
+    "bachelor's degree required",
+    "comptia a+ required",
+    "5+ years",
+    "cissp",
+    "ccna required"
+  ],
+  "candidate_facts": {
+    "_help": "null = unknown -> job goes to needs_review. Fill in only TRUE facts. credentials_held is authoritative: anything not listed is treated as NOT held.",
+    "location": "Newark, OH",
+    "remote_ok": true,
+    "hybrid_ok": true,
+    "onsite_ok": true,
+    "work_authorized_us": true,
+    "us_citizen": true,
+    "needs_sponsorship": false,
+    "security_clearance": "none",
+    "drivers_license": true,
+    "education_highest": "high_school",
+    "credentials_held": [
+      "epa_609"
+    ],
+    "years_professional_it": 0,
+    "years_mechanical_diagnostics": 8,
+    "max_travel_pct": null,
+    "shifts_ok": [
+      "day"
+    ],
+    "_sources": "From resume (Kyle_Lawhon_Technical_Resume_Updated.docx): high school 2015, EPA 609, repair/diesel roles Mar 2018-present (~8 yrs). No paid IT role listed -> years_professional_it 0. Work auth, license/CDL, travel, shifts not on resume -> still null.",
+    "max_commute_minutes": 60,
+    "commute_ok_cities": [
+      "Newark",
+      "Heath",
+      "Granville",
+      "Hebron",
+      "Pataskala",
+      "Johnstown",
+      "Etna",
+      "Reynoldsburg",
+      "Gahanna",
+      "Columbus",
+      "Whitehall",
+      "Zanesville",
+      "Mount Vernon",
+      "Lancaster",
+      "Westerville",
+      "New Albany"
+    ],
+    "_commute_help": "commute_ok_cities = cities you're fine driving to (approx. under 60 min from Newark; edit freely). Other cities just get a 'check commute' note, never an auto-fail.",
+    "shifts_no": [
+      "evening"
+    ],
+    "_shift_help": "day=1st shift (preferred), evening=2nd shift (no). Night/weekend/on-call/rotating not decided yet -> review."
+  },
+  "evidence": [
+    {
+      "_help": "status 'verified' ONLY counts if ref is filled: resume line (e.g. 'resume.txt:L12'), public URL for type=portfolio, or a local note path. Otherwise it is auto-downgraded to self_reported."
+    },
+    {
+      "id": "E1",
+      "type": "resume",
+      "status": "verified",
+      "ref": "resume.docx #Nabluna (2026)",
+      "skills": [
+        "android",
+        "kotlin",
+        "jetpack compose",
+        "android studio",
+        "testing",
+        "debugging"
+      ],
+      "summary": "Nabluna: offline-first Android AR astronomy app; Kotlin/Compose; closed testing + Google Play production releases. Add Play Store URL as a portfolio entry for stronger evidence."
+    },
+    {
+      "id": "E2",
+      "type": "resume",
+      "status": "verified",
+      "ref": "resume.docx #Penske Diesel Technician (Nov 2021-Jun 2023), Walmart Repair Technician (Jun 2023-Present), Thayer (2020-2021)",
+      "skills": [
+        "diagnostics",
+        "troubleshooting",
+        "root cause",
+        "electrical",
+        "maintenance",
+        "preventive maintenance",
+        "documentation",
+        "problem solving"
+      ],
+      "summary": "Electrical/HVAC/mechanical/computerized-system fault diagnosis, DOT inspections, PM, repair documentation."
+    },
+    {
+      "id": "E3",
+      "type": "resume",
+      "status": "verified",
+      "ref": "resume.docx #PTO Forecast (2026), NOVA OS (2025-2026)",
+      "skills": [
+        "python",
+        "kivy",
+        "git",
+        "github",
+        "gradle"
+      ],
+      "summary": "Python/Kivy Android apps packaged with Buildozer/python-for-android; Git workflows."
+    },
+    {
+      "id": "E4",
+      "type": "resume",
+      "status": "verified",
+      "ref": "resume.docx #Core Technologies: Linux/Systems; CyberLab (2026)",
+      "skills": [
+        "bash",
+        "cli",
+        "command line",
+        "linux",
+        "scripting",
+        "shell",
+        "shell scripting",
+        "ssh",
+        "termux",
+        "ubuntu"
+      ],
+      "summary": "Linux/Termux CLI, package/dependency troubleshooting, SSH, tmux. Resume: 'shell/CLI workflows'."
+    },
+    {
+      "id": "E5",
+      "type": "resume",
+      "status": "verified",
+      "ref": "resume.docx #CyberLab (2026)",
+      "skills": [
+        "networking",
+        "tcp/ip",
+        "dns",
+        "nmap",
+        "cybersecurity",
+        "burp suite",
+        "api testing",
+        "osint",
+        "ctf"
+      ],
+      "summary": "Self-directed security lab + OverTheWire Bandit. LAB experience, not employment."
+    },
+    {
+      "id": "E6",
+      "type": "resume",
+      "status": "verified",
+      "ref": "resume.docx #Core Technologies: Engineering",
+      "skills": [
+        "hardware"
+      ],
+      "summary": "Electronics and hardware experimentation."
+    },
+    {
+      "id": "E7",
+      "type": "resume",
+      "status": "self_reported",
+      "ref": "",
+      "skills": [
+        "customer service",
+        "customer communication",
+        "inventory"
+      ],
+      "summary": "Good Guys Garage shop manager: 'clear customer communication', inventory. Not a customer-service role; kept self_reported on purpose."
+    },
+    {
+      "id": "E8",
+      "type": "resume",
+      "status": "verified",
+      "ref": "resume.docx #Education & Certification",
+      "skills": [
+        "epa_609",
+        "high_school"
+      ],
+      "summary": "High School Diploma (Newark High School, 2015); EPA Section 609 Certification."
+    },
+    {
+      "id": "E9",
+      "type": "portfolio",
+      "status": "self_reported",
+      "ref": "",
+      "skills": [
+        "android",
+        "kotlin",
+        "jetpack compose"
+      ],
+      "summary": "PENDING: Nabluna Google Play listing (in public review). When live, paste the https:// URL into ref and set status to verified."
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+title,company,url,description,pay_min,pay_max,pay_period,pay_currency
+IT Help Desk Technician,Example Support Co,https://example.com/job/1,"Entry level IT support, troubleshooting hardware, documentation, customer service, basic networking and DNS.",22,28,hour,USD
+Technical Product Support Specialist,Example Software Co,https://example.com/job/2,"Technical support, root cause diagnostics, Python scripting, troubleshooting and quality assurance for Android products.",55000,70000,year,USD
+Senior Security Engineer,Example Security Co,https://example.com/job/3,"Security clearance, CISSP, 5+ years cybersecurity, incident response, Linux, and networking.",,,,

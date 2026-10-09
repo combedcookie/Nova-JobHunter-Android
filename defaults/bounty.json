@@ -1,0 +1,17 @@
+{
+  "_help": [
+    "BugHunter reads PUBLIC listings only and never contacts program targets.",
+    "platforms: any of hackerone, bugcrowd, intigriti, yeswehack, diodb (disclose.io).",
+    "hackerone is ~0.6 MB compressed / 18 MB unpacked: remove it if your phone struggles.",
+    "min_interval_minutes: how often sync may download again (hard floor 30)."
+  ],
+  "platforms": [
+    "hackerone",
+    "bugcrowd",
+    "intigriti",
+    "yeswehack",
+    "diodb"
+  ],
+  "min_interval_minutes": 360,
+  "timeout_seconds": 60
+}

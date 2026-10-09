@@ -1,0 +1,12 @@
+{"time": "2026-10-09T21:24:15+00:00", "job_id": 1, "event": "JOB_DISCOVERED", "details": {"score": 53, "gate": "pass", "status": "discovered", "title": "IT Help Desk Technician", "company": "Example Support Co", "pay": "$22\u2013$28/hr (USD)"}}
+{"time": "2026-10-09T21:24:15+00:00", "job_id": 2, "event": "JOB_DISCOVERED", "details": {"score": 70, "gate": "pass", "status": "discovered", "title": "Technical Product Support Specialist", "company": "Example Software Co", "pay": "$55,000\u2013$70,000/yr (USD)"}}
+{"time": "2026-10-09T21:24:15+00:00", "job_id": 3, "event": "JOB_DISCOVERED", "details": {"score": 20, "gate": "fail", "status": "needs_review", "title": "Senior Security Engineer", "company": "Example Security Co", "pay": "Not disclosed"}}
+{"time": "2026-10-09T21:32:19+00:00", "job_id": null, "event": "SOURCE_CHECKED", "details": {"source": "sample", "status": "ok", "new": 0, "dup": 3, "filtered": 0, "invalid": 0}}
+{"time": "2026-10-09T21:32:25+00:00", "job_id": null, "event": "SOURCE_CHECKED", "details": {"source": "sample", "status": "ok", "new": 0, "dup": 3, "filtered": 0, "invalid": 0}}
+{"time": "2026-10-09T21:32:38+00:00", "job_id": null, "event": "SOURCE_CHECKED", "details": {"source": "sample", "status": "ok", "new": 0, "dup": 3, "filtered": 0, "invalid": 0}}
+{"time": "2026-10-09T21:33:20+00:00", "job_id": null, "event": "SOURCE_CHECKED", "details": {"source": "sample", "status": "ok", "new": 0, "dup": 3, "filtered": 0, "invalid": 0}}
+{"time": "2026-10-09T21:33:26+00:00", "job_id": null, "event": "SOURCE_CHECKED", "details": {"source": "sample", "status": "ok", "new": 0, "dup": 3, "filtered": 0, "invalid": 0}}
+{"time": "2026-10-09T21:39:37+00:00", "job_id": null, "event": "SOURCE_CHECKED", "details": {"source": "sample", "status": "ok", "new": 0, "dup": 3, "filtered": 0, "invalid": 0}}
+{"time": "2026-10-09T21:39:37+00:00", "job_id": 2, "event": "STATUS_CHANGED", "details": {"from": "discovered", "to": "shortlisted", "confirmation": null, "gate_override": null}}
+{"time": "2026-10-09T23:02:08+00:00", "job_id": null, "event": "BB_PLAN_WRITTEN", "details": {"program_id": 353, "name": "DuckDuckGo", "path": "/data/data/com.termux/files/home/NOVA_JobHunter_KyleStyle/bugbounty/plans/0353-duckduckgo.md"}}
+{"time": "2026-10-09T23:16:15+00:00", "job_id": null, "event": "SOURCE_CHECKED", "details": {"source": "sample", "status": "ok", "new": 0, "dup": 3, "filtered": 0, "invalid": 0}}

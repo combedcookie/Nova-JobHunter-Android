@@ -1,0 +1,35 @@
+[
+  {
+    "title": "IT Help Desk Technician",
+    "company": "Example Support Co",
+    "url": "https://example.com/job/1",
+    "description": "Entry level IT support, troubleshooting hardware, documentation, customer service, basic networking and DNS.",
+    "pay_min": "22",
+    "pay_max": "28",
+    "pay_period": "hour",
+    "pay_currency": "USD",
+    "score": 68
+  },
+  {
+    "title": "Technical Product Support Specialist",
+    "company": "Example Software Co",
+    "url": "https://example.com/job/2",
+    "description": "Technical support, root cause diagnostics, Python scripting, troubleshooting and quality assurance for Android products.",
+    "pay_min": "55000",
+    "pay_max": "70000",
+    "pay_period": "year",
+    "pay_currency": "USD",
+    "score": 76
+  },
+  {
+    "title": "Senior Security Engineer",
+    "company": "Example Security Co",
+    "url": "https://example.com/job/3",
+    "description": "Security clearance, CISSP, 5+ years cybersecurity, incident response, Linux, and networking.",
+    "pay_min": "",
+    "pay_max": "",
+    "pay_period": "",
+    "pay_currency": "",
+    "score": 18
+  }
+]

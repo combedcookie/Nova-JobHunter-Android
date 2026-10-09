@@ -1,0 +1,28 @@
+{
+  "_help": [
+    "Sources checked by: python job_hunter.py run",
+    "csv/json = local files (path relative to this folder). No filter unless you add one.",
+    "greenhouse/lever = official public job-board APIs. 'board' is the slug in the company's",
+    "  careers URL: job-boards.greenhouse.io/<board>  or  jobs.lever.co/<board>.",
+    "Network sources default to filter {title_any: profile, location_any: profile}, drop senior/lead/manager titles,",
+    "  and are never checked more often than min_interval_minutes (hard floor 10).",
+    "Do not add LinkedIn/Indeed or any site without an official public API."
+  ],
+  "defaults": {
+    "min_interval_minutes": 120,
+    "request_delay_seconds": 2,
+    "timeout_seconds": 20,
+    "high_match_min": 60,
+    "unconventional_min": 60
+  },
+  "sources": [
+    {"name": "sample", "type": "csv", "path": "sample_jobs.csv", "enabled": true},
+    {"name": "my_jobs", "type": "csv", "path": "my_jobs.csv", "enabled": false,
+     "_note": "Paste jobs you find by hand into my_jobs.csv (same columns as sample_jobs.csv), then set enabled true."},
+    {"name": "inbox_json", "type": "json", "path": "inbox_jobs.json", "enabled": false},
+    {"name": "gitlab", "type": "greenhouse", "board": "gitlab", "company": "GitLab", "enabled": false,
+     "_note": "Example of a working Greenhouse board (all-remote company). Enable to try a live check."},
+    {"name": "lever_example", "type": "lever", "board": "COMPANY_SLUG_HERE", "enabled": false,
+     "_note": "Replace board with a real jobs.lever.co/<slug> company, then enable."}
+  ]
+}

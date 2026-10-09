@@ -1,0 +1,387 @@
+{
+ "_help": "Source of truth for resume variants. Every bullet is copied from Kyle_Lawhon_Technical_Resume_Updated.docx. Edit here, never in generated files. Tags decide which variant uses a bullet first.",
+ "skills": {
+  "Programming / App Development": [
+   "Python",
+   "Kotlin",
+   "Kivy",
+   "Jetpack Compose",
+   "Android Studio",
+   "Gradle/build workflows",
+   "Android SDK tooling",
+   "Git/GitHub",
+   "application debugging and testing"
+  ],
+  "Linux / Systems": [
+   "Linux",
+   "Ubuntu",
+   "Termux",
+   "Kali NetHunter",
+   "shell/CLI workflows",
+   "package and dependency troubleshooting",
+   "SSH",
+   "curl",
+   "jq",
+   "tmux",
+   "Buildozer",
+   "python-for-android"
+  ],
+  "Networking / Security Labs": [
+   "TCP/IP fundamentals",
+   "Nmap",
+   "basic recon and network diagnostics",
+   "OverTheWire Bandit",
+   "BLE experimentation",
+   "authorized CTF/bug-bounty learning",
+   "Burp Suite and web/API testing fundamentals"
+  ],
+  "AI / Architecture": [
+   "local AI orchestration",
+   "memory systems",
+   "intention classification",
+   "modular reasoning pipelines",
+   "cognitive-state experiments",
+   "watchdog/oversight architecture",
+   "privacy-oriented AI design"
+  ],
+  "Engineering": [
+   "root-cause troubleshooting",
+   "AC/DC electrical diagnostics",
+   "electronics and hardware experimentation",
+   "technical documentation",
+   "rapid prototyping",
+   "3D-printing/software workflows"
+  ]
+ },
+ "projects": [
+  {
+   "name": "Nabluna - Android AR Astronomy Application",
+   "role": "Independent Developer",
+   "dates": "2026",
+   "tags": [
+    "qa",
+    "software",
+    "android"
+   ],
+   "bullets": [
+    {
+     "text": "Designed and built an offline-first Android astronomy application with AR/sensor-driven sky interaction, sky-object discovery, astronomy-event features, collection mechanics, achievements, private journaling, local storage, notifications, and educational content.",
+     "tags": [
+      "software",
+      "android"
+     ]
+    },
+    {
+     "text": "Worked across Kotlin/Jetpack Compose, Android Studio, device sensors, astronomy calculations, UI architecture, local application state, testing, debugging, versioning, and release configuration.",
+     "tags": [
+      "software",
+      "qa",
+      "android",
+      "debugging"
+     ]
+    },
+    {
+     "text": "Managed closed testing and Google Play production workflows, including app bundles, Play Console configuration, store-listing compliance, release iterations, and device-level troubleshooting.",
+     "tags": [
+      "qa",
+      "support",
+      "release",
+      "troubleshooting"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "PTO Forecast - Android Utility",
+   "role": "Independent Developer",
+   "dates": "2026",
+   "tags": [
+    "software",
+    "qa",
+    "support"
+   ],
+   "bullets": [
+    {
+     "text": "Built a Python/Kivy mobile application for PTO/PPTO accrual forecasting, balance projections, caps/rollover logic, date calculations, first-hit estimates, and copyable results.",
+     "tags": [
+      "software",
+      "python"
+     ]
+    },
+    {
+     "text": "Worked through Android packaging with Buildozer/python-for-android, Git, Cython, Java 17, Android SDK/build tools, adaptive icons, permissions, and dependency/build troubleshooting.",
+     "tags": [
+      "support",
+      "troubleshooting",
+      "software",
+      "it"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "CyberLab / Linux Security Learning Environment",
+   "role": "Independent Lab",
+   "dates": "2026",
+   "tags": [
+    "security",
+    "it",
+    "support"
+   ],
+   "bullets": [
+    {
+     "text": "Built a structured Termux/Linux learning environment for networking, BLE, web, OSINT, Android, reverse-engineering, CTF, RF, and NFC experimentation.",
+     "tags": [
+      "security",
+      "it",
+      "linux"
+     ]
+    },
+    {
+     "text": "Used Python and command-line tooling including Nmap, OpenSSH, curl, socat, Git, requests/httpx-style web tooling, DNS utilities, and BLE libraries; created small system/network information and local-scan utilities.",
+     "tags": [
+      "security",
+      "it",
+      "networking"
+     ]
+    },
+    {
+     "text": "Completed hands-on OverTheWire Bandit work and explored authorized bug-bounty methodology focused on recon, access-control issues, API behavior, information disclosure, and application logic.",
+     "tags": [
+      "security",
+      "qa"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "NOVA OS - Local AI Assistant / Cognitive Architecture",
+   "role": "Independent R&D",
+   "dates": "2025-2026",
+   "tags": [
+    "software"
+   ],
+   "bullets": [
+    {
+     "text": "Built multiple NOVA prototypes, including a Python/Kivy Android interface with threaded message handling, custom chat UI, navigation, animation, keyboard handling, and modular core integration.",
+     "tags": [
+      "software",
+      "python"
+     ]
+    },
+    {
+     "text": "Developed experiments around local JSON memory, memory trimming/storage, intention classification, cognitive-state modules, tool/skill loading, and separation of model, memory, orchestration, interface, and oversight layers.",
+     "tags": [
+      "software"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "Paralogic Engine - Experimental Reasoning Architecture",
+   "role": "Independent R&D",
+   "dates": "2025-Present",
+   "tags": [
+    "software"
+   ],
+   "bullets": [
+    {
+     "text": "Researching and prototyping a privacy-oriented cognitive architecture for multi-phase reasoning, adaptive memory, knowledge representation, and human-AI interaction.",
+     "tags": [
+      "software"
+     ]
+    },
+    {
+     "text": "Designed the project around modular reasoning and independent oversight concepts, with emphasis on examining context and internal consistency across multiple processing stages.",
+     "tags": [
+      "software"
+     ]
+    }
+   ]
+  }
+ ],
+ "experience": [
+  {
+   "title": "Repair Technician",
+   "company": "Walmart",
+   "location": "",
+   "dates": "Jun 2023-Present",
+   "bullets": [
+    {
+     "text": "Perform hands-on diagnosis and repair work in a fast-paced shop environment, using systematic troubleshooting to identify faults and complete repairs accurately.",
+     "tags": [
+      "troubleshooting",
+      "support",
+      "it"
+     ]
+    },
+    {
+     "text": "Apply electrical, mechanical, and computerized-system diagnostic experience while prioritizing safety, reliability, documentation, and equipment uptime.",
+     "tags": [
+      "documentation",
+      "qa",
+      "it"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Diesel Technician",
+   "company": "Penske Truck Leasing",
+   "location": "Gahanna, OH",
+   "dates": "Nov 2021-Jun 2023",
+   "bullets": [
+    {
+     "text": "Diagnose complex electrical, HVAC, mechanical, and computerized vehicle-system faults using structured symptom-to-root-cause troubleshooting.",
+     "tags": [
+      "troubleshooting",
+      "support",
+      "it",
+      "qa"
+     ]
+    },
+    {
+     "text": "Interpret diagnostic information, isolate wiring/component/control failures, document repairs, and return fleet equipment to service under time pressure.",
+     "tags": [
+      "documentation",
+      "support",
+      "it"
+     ]
+    },
+    {
+     "text": "Perform DOT inspections and preventive maintenance while balancing safety, accuracy, uptime, and independent problem solving.",
+     "tags": [
+      "qa",
+      "compliance"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Diesel Mechanic",
+   "company": "Thayer Power and Communication",
+   "location": "",
+   "dates": "Jul 2020-Jul 2021",
+   "bullets": [
+    {
+     "text": "Diagnosed AC/DC electrical, generator, hydraulic, equipment-control, and mechanical faults on specialized fleet equipment; upfitted new vehicles for deployment.",
+     "tags": [
+      "troubleshooting",
+      "it"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Service Technician",
+   "company": "John Hinderer Honda",
+   "location": "",
+   "dates": "Jul 2019-Jul 2020",
+   "bullets": [
+    {
+     "text": "Diagnosed and repaired vehicle systems while managing scheduled work in a production service environment.",
+     "tags": [
+      "troubleshooting"
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Mechanic & Shop Manager",
+   "company": "Good Guys Garage",
+   "location": "",
+   "dates": "Mar 2018-Jul 2019",
+   "bullets": [
+    {
+     "text": "Combined hands-on diagnostics with shop operations, inventory, payment records, workflow management, and clear customer communication.",
+     "tags": [
+      "support",
+      "customer"
+     ]
+    }
+   ]
+  }
+ ],
+ "education": [
+  "High School Diploma - Newark High School, Newark, OH | 2015"
+ ],
+ "certifications": [
+  "EPA Section 609 Certification"
+ ],
+ "variants": {
+  "it_support": {
+   "label": "IT Support / Help Desk",
+   "headline": "IT SUPPORT • TROUBLESHOOTING • LINUX • HARDWARE",
+   "summary": "Systems troubleshooter transitioning from heavy-duty fleet repair into IT support. 8+ years of hands-on, structured root-cause diagnosis across electrical, electronic, mechanical, and computerized systems, plus self-directed work in Linux/Termux, networking labs, and Android app development. Comfortable documenting repairs, working under time pressure, and explaining problems clearly.",
+   "skill_order": [
+    "Linux / Systems",
+    "Engineering",
+    "Networking / Security Labs",
+    "Programming / App Development"
+   ],
+   "tag_order": [
+    "it",
+    "troubleshooting",
+    "support",
+    "documentation",
+    "linux",
+    "networking"
+   ],
+   "projects": [
+    "CyberLab / Linux Security Learning Environment",
+    "PTO Forecast - Android Utility",
+    "Nabluna - Android AR Astronomy Application"
+   ]
+  },
+  "qa_software": {
+   "label": "Junior QA / Software",
+   "headline": "SOFTWARE • QA/TESTING • ANDROID • PYTHON",
+   "summary": "Self-taught software builder with two Android apps taken from prototype through device testing and release workflows, including Google Play closed testing and release workflows. Works in Python, Kotlin/Jetpack Compose, Kivy, Git, and Linux/Termux, and brings 8+ years of disciplined root-cause diagnosis from fleet and equipment repair to debugging and testing.",
+   "skill_order": [
+    "Programming / App Development",
+    "Linux / Systems",
+    "Engineering",
+    "AI / Architecture"
+   ],
+   "tag_order": [
+    "qa",
+    "software",
+    "android",
+    "debugging",
+    "release",
+    "python"
+   ],
+   "projects": [
+    "Nabluna - Android AR Astronomy Application",
+    "PTO Forecast - Android Utility",
+    "NOVA OS - Local AI Assistant / Cognitive Architecture",
+    "CyberLab / Linux Security Learning Environment"
+   ]
+  },
+  "tech_security": {
+   "label": "Technical Support / Security Trainee",
+   "headline": "TECHNICAL SUPPORT • SECURITY LABS • LINUX • NETWORKING",
+   "summary": "Technical troubleshooter moving from heavy-duty fleet repair into technical support and security. Hands-on lab experience with Linux/Termux, TCP/IP fundamentals, Nmap, OverTheWire Bandit, and Burp Suite web/API testing fundamentals (self-directed labs, not professional security work), backed by 8+ years of structured symptom-to-root-cause diagnosis and repair documentation.",
+   "skill_order": [
+    "Networking / Security Labs",
+    "Linux / Systems",
+    "Engineering",
+    "Programming / App Development"
+   ],
+   "tag_order": [
+    "security",
+    "support",
+    "troubleshooting",
+    "networking",
+    "linux",
+    "it"
+   ],
+   "projects": [
+    "CyberLab / Linux Security Learning Environment",
+    "Nabluna - Android AR Astronomy Application",
+    "PTO Forecast - Android Utility"
+   ]
+  }
+ },
+ "pitch_background": "I spent 8+ years diagnosing electrical, mechanical, and computerized systems in fleet and shop repair, and I have built and tested Android and Python apps on my own."
+}
