@@ -374,6 +374,34 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
   });
  }
 
+ // NOVA_HTTPBIN_V1: fixed benign endpoint, no user-supplied URL, one approved GET.
+ @JavascriptInterface public void novaHttpbinTest(int id){
+  runOnUiThread(()->new android.app.AlertDialog.Builder(MainActivity.this)
+   .setTitle("Approve one HTTPS test")
+   .setMessage("GET https://httpbin.org/get?source=nova\n\nOnly this fixed endpoint. No credentials, cookies or custom headers. One request, no redirects. Approve?")
+   .setNegativeButton("Reject",(d,w)->reply("novaHttpbinResult",id,false,"Rejected by user"))
+   .setOnCancelListener(d->reply("novaHttpbinResult",id,false,"Cancelled by user"))
+   .setPositiveButton("Approve once",(d,w)->new Thread(()->{
+    java.net.HttpURLConnection c=null;
+    try{
+     java.net.URL u=new java.net.URL("https://httpbin.org/get?source=nova");
+     c=(java.net.HttpURLConnection)u.openConnection();
+     c.setInstanceFollowRedirects(false);
+     c.setRequestMethod("GET");c.setConnectTimeout(8000);c.setReadTimeout(8000);
+     c.setRequestProperty("Accept","application/json");
+     int status=c.getResponseCode();
+     java.io.InputStream stream=(status>=400)?c.getErrorStream():c.getInputStream();
+     java.io.ByteArrayOutputStream bytes=new java.io.ByteArrayOutputStream();
+     if(stream!=null)try(java.io.InputStream in=stream){byte[] buf=new byte[2048];int n;while((n=in.read(buf))!=-1){if(bytes.size()+n>16384)throw new Exception("Response exceeds 16 KiB limit");bytes.write(buf,0,n);}}
+     JSONObject result=new JSONObject().put("environment","live_httpbin").put("request","GET https://httpbin.org/get?source=nova")
+      .put("status",status).put("body",new String(bytes.toByteArray(),StandardCharsets.UTF_8))
+      .put("approved_once",true).put("network_used",true).put("timestamp",System.currentTimeMillis());
+     reply("novaHttpbinResult",id,true,result.toString());
+    }catch(Exception e){reply("novaHttpbinResult",id,false,"HTTPS test failed: "+(e.getMessage()==null?e.getClass().getSimpleName():e.getMessage()));}
+    finally{if(c!=null)c.disconnect();}
+   }).start()).show());
+ }
+
  @JavascriptInterface public void open(String url){runOnUiThread(()->openExternal(url));}
  }
  @Override public void onBackPressed(){if(web.canGoBack())web.goBack();else super.onBackPressed();}
