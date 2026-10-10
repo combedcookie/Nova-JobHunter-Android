@@ -4,7 +4,7 @@ const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]);
 const store=new Map(),sent=[];const elements={};
 const get=id=>elements[id]||=( {value:'',innerHTML:'',focus(){},classList:{toggle(){},remove(){}}} );
 const bridge={novaGenerate:(prompt,id)=>sent.push({prompt,id})};
-const ctx=vm.createContext({window:{addEventListener(){},Nova:bridge},Nova:bridge,document:{getElementById:get,querySelectorAll(){return []}},localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},console,Date,JSON,alert(){},confirm(){return true},encodeURIComponent,decodeURIComponent});
+const ctx=vm.createContext({window:{addEventListener(){},Nova:bridge},Nova:bridge,document:{getElementById:get,querySelectorAll(){return []}},localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},console,Date,JSON,setTimeout:()=>1,clearTimeout:()=>{},alert(){},confirm(){return true},encodeURIComponent,decodeURIComponent});
 for(const script of scripts)vm.runInContext(script,ctx);
 vm.runInContext("show('NOVA AI')",ctx);
 get('novaAiInput').value='What is the weather on Mars?';
