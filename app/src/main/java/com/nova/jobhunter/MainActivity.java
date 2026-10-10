@@ -20,7 +20,15 @@ public class MainActivity extends Activity {
  private static final String KEY_ALIAS="nova_provider_credentials_v1";
  @Override public void onCreate(Bundle b){super.onCreate(b);getWindow().setStatusBarColor(0xfff1e9db);getWindow().setNavigationBarColor(0xfff1e9db);
  web=new WebView(this); WebSettings s=web.getSettings();s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setAllowFileAccess(true);s.setAllowFileAccessFromFileURLs(false);s.setAllowUniversalAccessFromFileURLs(false);s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
- web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebViewClient(){@Override public boolean shouldOverrideUrlLoading(WebView v,WebResourceRequest r){Uri u=r.getUrl();if(!"file".equals(u.getScheme())||!"android_asset".equals(u.getHost())){openExternal(u.toString());return true;}return false;}});setContentView(web);web.loadUrl("file:///android_asset/index.html");}
+ web.setWebChromeClient(new WebChromeClient(){
+ @Override public boolean onConsoleMessage(ConsoleMessage m){
+  android.util.Log.d("NOVA_WEBVIEW",
+   "JavaScript "+m.messageLevel()+" at line "+m.lineNumber()+
+   " in "+m.sourceId());
+  return true;
+ }
+});
+web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebViewClient(){@Override public boolean shouldOverrideUrlLoading(WebView v,WebResourceRequest r){Uri u=r.getUrl();if(!"file".equals(u.getScheme())||!"android_asset".equals(u.getHost())){openExternal(u.toString());return true;}return false;}});setContentView(web);web.loadUrl("file:///android_asset/index.html");}
  private void openExternal(String url){try{Uri u=Uri.parse(url);if(!"https".equalsIgnoreCase(u.getScheme()))return;startActivity(new Intent(Intent.ACTION_VIEW,u));}catch(Exception ignored){}}
  private synchronized SecretKey secret()throws Exception{KeyStore ks=KeyStore.getInstance("AndroidKeyStore");ks.load(null);if(!ks.containsAlias(KEY_ALIAS)){KeyGenerator g=KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES,"AndroidKeyStore");g.init(new KeyGenParameterSpec.Builder(KEY_ALIAS,KeyProperties.PURPOSE_ENCRYPT|KeyProperties.PURPOSE_DECRYPT).setBlockModes(KeyProperties.BLOCK_MODE_GCM).setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE).build());g.generateKey();}return ((KeyStore.SecretKeyEntry)ks.getEntry(KEY_ALIAS,null)).getSecretKey();}
  private synchronized JSONObject credentials()throws Exception{String stored=getPreferences(0).getString("encrypted_profiles","");if(stored.isEmpty())return new JSONObject();byte[] raw=Base64.decode(stored,Base64.NO_WRAP);byte[] iv=new byte[12];System.arraycopy(raw,0,iv,0,12);Cipher c=Cipher.getInstance("AES/GCM/NoPadding");c.init(Cipher.DECRYPT_MODE,secret(),new GCMParameterSpec(128,iv));return new JSONObject(new String(c.doFinal(raw,12,raw.length-12),StandardCharsets.UTF_8));}

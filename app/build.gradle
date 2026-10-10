@@ -1,5 +1,28 @@
 plugins { id 'com.android.application' }
-android { namespace 'com.nova.jobhunter'; compileSdk 35
- defaultConfig { applicationId 'com.nova.jobhunter'; minSdk 26; targetSdk 35; versionCode 1; versionName '0.7.0-preview' }
+android {
+ namespace 'com.nova.jobhunter'
+ compileSdk 35
+ defaultConfig {
+  applicationId 'com.nova.jobhunter'
+  minSdk 26
+  targetSdk 35
+  versionCode 2
+  versionName '0.8.0-preview'
+ }
  compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+ def keyPath = System.getenv('NOVA_KEYSTORE_PATH')
+ def keyPass = System.getenv('NOVA_KEYSTORE_PASSWORD')
+ def alias = System.getenv('NOVA_KEY_ALIAS')
+ def aliasPass = System.getenv('NOVA_KEY_PASSWORD')
+ if (keyPath && keyPass && alias && aliasPass) {
+  signingConfigs {
+   novaRelease {
+    storeFile file(keyPath)
+    storePassword keyPass
+    keyAlias alias
+    keyPassword aliasPass
+   }
+  }
+  buildTypes { release { signingConfig signingConfigs.novaRelease; minifyEnabled false } }
+ }
 }

@@ -14,15 +14,36 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - name: Install Android SDK
-        run: yes | sdkmanager 'platforms;android-35' 'build-tools;35.0.0' || true
-      - name: Compile debug APK
-        run: gradle --no-daemon :app:assembleDebug
+      - name: Install Android platform
+        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Test dashboard
+        run: node test.cjs && node test-interactions.cjs
+      - name: Validate signing secrets
+        env:
+          KEYSTORE_B64: ${{ secrets.NOVA_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.NOVA_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.NOVA_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.NOVA_KEY_PASSWORD }}
+        run: |
+          test -n "$KEYSTORE_B64" && test -n "$KEYSTORE_PASSWORD" && test -n "$KEY_ALIAS" && test -n "$KEY_PASSWORD" || { echo 'Missing NOVA signing secrets'; exit 1; }
+          printf '%s' "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/nova-release.jks"
+          chmod 600 "$RUNNER_TEMP/nova-release.jks"
+      - name: Compile signed release APK
+        env:
+          NOVA_KEYSTORE_PATH: ${{ runner.temp }}/nova-release.jks
+          NOVA_KEYSTORE_PASSWORD: ${{ secrets.NOVA_KEYSTORE_PASSWORD }}
+          NOVA_KEY_ALIAS: ${{ secrets.NOVA_KEY_ALIAS }}
+          NOVA_KEY_PASSWORD: ${{ secrets.NOVA_KEY_PASSWORD }}
+        run: gradle --no-daemon :app:assembleRelease
       - uses: actions/upload-artifact@v4
         with:
-          name: NOVA-Board-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: NOVA-Board-signed-release-apk
+          path: app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
