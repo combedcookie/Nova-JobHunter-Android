@@ -85,6 +85,9 @@ public class MainActivity extends Activity {
   return xml.replace("&amp;","&").replace("&lt;","<").replace("&gt;",">").replace("&quot;","\"").replace("&apos;","'");
  }
 
+ private volatile boolean novaForeground=true;
+ @Override protected void onResume(){super.onResume();novaForeground=true;}
+ @Override protected void onPause(){novaForeground=false;super.onPause();}
  private static final String COPILOT_CHANNEL="nova_copilot_tasks";
  private void copilotNotify(String title,String message){
   if(android.os.Build.VERSION.SDK_INT>=33 && checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)return;
@@ -240,7 +243,8 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
     String answer=nativeGenerate(model.getAbsolutePath(),prompt);
     if(answer.startsWith("NOVA_ENGINE_ERROR:"))throw new Exception(answer);
     reply("novaAiResult",id,true,answer);
-   }catch(Exception e){reply("novaAiResult",id,false,e.getMessage()==null?"Generation failed":e.getMessage());}
+    if(!novaForeground)runOnUiThread(()->copilotNotify("NOVA finished thinking","Tap to review your AI response"));
+   }catch(Exception e){reply("novaAiResult",id,false,e.getMessage()==null?"Generation failed":e.getMessage());if(!novaForeground)runOnUiThread(()->copilotNotify("NOVA needs attention","AI task failed; tap to review"));}
    finally{generationBusy.set(false);}
   },"nova-ai").start();
  }
