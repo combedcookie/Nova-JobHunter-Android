@@ -39,6 +39,14 @@ label{color:#b7d3e6!important;font-family:system-ui,sans-serif!important;font-we
 .nova-chat-input{display:flex;gap:8px;align-items:stretch}.nova-chat-input textarea{flex:1;min-height:55px}
 @media(prefers-reduced-motion:reduce){.nova-orb{animation:none}}
 
+
+/* NOVA ANDROID SAFE AREA */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .top {
+    padding-top: calc(17px + env(safe-area-inset-top));
+  }
+}
+
 </style></head><body><header class="top"><span class="star">✦</span><span class="brand">NOVA BOARD</span><button class="menu" onclick="toggleMenu()" aria-label="Toggle menu">☰</button></header><div class="layout"><aside id="nav"></aside><main id="content"></main></div>
 <script>
 window.addEventListener('error', function(e) {
