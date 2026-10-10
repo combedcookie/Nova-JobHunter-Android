@@ -256,16 +256,27 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
    JSONObject headers=new JSONObject().put("Authorization","Basic "+basic).put("Accept","application/json");
    String base="https://api.hackerone.com/v1/hackers/programs/"+handle;
    JSONObject out=new JSONObject().put("handle",handle);
-   JSONObject programResponse=new JSONObject(http(base,headers));
-   JSONObject program=programResponse.optJSONObject("data");
-   if(program==null){
-    String shape=programResponse.has("errors")?"API returned errors collection":programResponse.has("error")?"API returned error object":programResponse.has("data")?"data is not an object":"data field absent";
-    throw new Exception("HackerOne detail response for "+handle+": "+shape+" (HTTP 200); scope not verified. Check program visibility and Hacker API access.");
+   // NOVA_H1_INDEPENDENT_FETCH_V4: program metadata and scope are separate API resources.
+   // Never manufacture a program record or treat partial scope as authorization.
+   try {
+    String raw=http(base,headers);
+    JSONObject programResponse=new JSONObject(raw);
+    JSONObject program=programResponse.optJSONObject("data");
+    if(program==null){
+     java.util.ArrayList<String> keys=new java.util.ArrayList<>();
+     java.util.Iterator<String> iter=programResponse.keys();
+     while(iter.hasNext()&&keys.size()<12){String key=iter.next();if(key.matches("[a-zA-Z_]{1,35}"))keys.add(key);}
+     out.put("program_error","Program metadata missing (HTTP 200; top-level fields: "+keys.toString()+").");
+    } else {
+     JSONObject attributes=program.optJSONObject("attributes");
+     String returnedHandle=attributes==null?"":attributes.optString("handle","");
+     if(!handle.equals(returnedHandle))out.put("program_error","Program handle mismatch; metadata not trusted");
+     else out.put("program",program);
+    }
+   }catch(Exception metadataError){
+    String msg=metadataError.getMessage()==null?"unknown error":metadataError.getMessage();
+    out.put("program_error","Program metadata unavailable: "+msg.substring(0,Math.min(180,msg.length())));
    }
-   JSONObject attributes=program.optJSONObject("attributes");
-   String returnedHandle=attributes==null?"":attributes.optString("handle","");
-   if(!returnedHandle.isEmpty()&&!handle.equalsIgnoreCase(returnedHandle))throw new Exception("HackerOne program handle mismatch: requested "+handle+", received "+returnedHandle);
-   out.put("program",program);
    // Fetch structured scopes and exclusions separately; do not infer scope from the program name.
    for(String type:new String[]{"structured_scopes","scope_exclusions"}){
     try{JSONObject data=new JSONObject(http(base+"/"+type+"?page%5Bsize%5D=100",headers));
