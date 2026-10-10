@@ -261,16 +261,24 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
    try {
     String raw=http(base,headers);
     JSONObject programResponse=new JSONObject(raw);
+    // NOVA_H1_DIRECT_PROGRAM_V6: live HackerOne detail endpoint may return
+    // {id,type,attributes,relationships} directly rather than {data:{...}}.
     JSONObject program=programResponse.optJSONObject("data");
+    if(program==null && !programResponse.has("data")
+       && "program".equals(programResponse.optString("type"))
+       && programResponse.optJSONObject("attributes")!=null){
+     program=programResponse;
+    }
     if(program==null){
      java.util.ArrayList<String> keys=new java.util.ArrayList<>();
      java.util.Iterator<String> iter=programResponse.keys();
      while(iter.hasNext()&&keys.size()<12){String key=iter.next();if(key.matches("[a-zA-Z_]{1,35}"))keys.add(key);}
-     out.put("program_error","Program metadata missing (HTTP 200; top-level fields: "+keys.toString()+").");
+     out.put("program_error","Program metadata unavailable (HTTP 200; response keys "+keys.toString()+"); scope not verified");
     } else {
      JSONObject attributes=program.optJSONObject("attributes");
      String returnedHandle=attributes==null?"":attributes.optString("handle","");
-     if(!handle.equals(returnedHandle))out.put("program_error","Program handle mismatch; metadata not trusted");
+     if(!"program".equals(program.optString("type")) || !handle.equalsIgnoreCase(returnedHandle))
+      out.put("program_error","Program type or handle mismatch; metadata not trusted");
      else out.put("program",program);
     }
    }catch(Exception metadataError){
