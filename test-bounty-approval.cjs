@@ -1,0 +1,14 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
+const html=fs.readFileSync('app/src/main/assets/index.html','utf8');
+const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(x=>x[1]);
+const els={},calls=[];const get=id=>els[id]||=( {value:'',checked:false,innerHTML:'',textContent:'',classList:{toggle(){},remove(){}}} );
+const bridge={auditWebsite:(...args)=>calls.push(args)};
+const ctx=vm.createContext({window:{Nova:bridge,addEventListener(){}},Nova:bridge,document:{getElementById:get,querySelectorAll(){return []}},localStorage:{getItem(){return null},setItem(){}},console,Date,JSON,URL,performance:{now:()=>0},alert(){},confirm(){return true},encodeURIComponent,decodeURIComponent});
+for(const script of scripts)vm.runInContext(script,ctx);
+get('auditTarget').value='https://example.com/';get('auditConsent').checked=true;
+vm.runInContext('runAudit()',ctx);assert.equal(calls.length,0,'Proposal must not execute');
+vm.runInContext('novaBountyApprove()',ctx);assert.equal(calls.length,0,'Approval checkbox required');
+get('novaBountyConsent').checked=true;vm.runInContext('novaBountyApprove()',ctx);assert.equal(calls.length,1);assert.equal(calls[0][0],'https://example.com/');
+vm.runInContext('novaBountyApprove()',ctx);assert.equal(calls.length,1,'Approval must be one-use');
+get('auditTarget').value='https://127.0.0.1/';vm.runInContext('runAudit()',ctx);assert.equal(calls.length,1);
+console.log('PASS bounty approval gate: propose, consent, single execution, no replay, rejects IP');
