@@ -344,6 +344,10 @@ function apRemove(i){if(!apQueue[i]||!confirm('Remove this application from the 
 try{show('Overview')}catch(e){document.getElementById('content').textContent='NOVA could not start. Please report this startup error (no personal data): '+(e&&e.name||'Unknown error')}
 
 let novaAiBusy=false,novaAiRequest=0,novaAiMessages=[];
+let novaAiCancelRequested=false,novaAiStalled=false,novaAiWatchdog=null;
+function novaAiStopWatchdog(){if(novaAiWatchdog!==null){clearTimeout(novaAiWatchdog);novaAiWatchdog=null;}}
+function novaAiWatch(id){novaAiStopWatchdog();novaAiWatchdog=setTimeout(()=>{if(novaAiBusy&&novaAiRequest===id){novaAiStalled=true;if(tab==='NOVA AI')show('NOVA AI');}},60000);}
+
 // NOVA_AGENT_CORE_11: safe text formatting and explicit session controls.
 function novaFormatAnswer(raw){
  const escaped=esc(String(raw||''));
@@ -363,7 +367,7 @@ function novaCurrentContextLabel(){
 function novaDisplayText(v){return esc(String(v||'')).replace(/\*\*([^*\n]+)\*\*/g,'<strong>$1</strong>');}
 function novaAiRender(){
  return novaAiMessages.map(m=>'<div class="item"><strong>'+esc(m.role)+'</strong><p style="white-space:pre-wrap;overflow-wrap:anywhere">'+novaFormatAnswer(m.text)+'</p></div>').join('')+
- (novaAiBusy?'<p class="note">Generating on device…</p>':'');
+ (novaAiBusy?'<p class="note">'+(novaAiCancelRequested?'Cancellation requested; waiting for native engine to stop…':novaAiStalled?'Still generating after 60 seconds. Request cancellation if needed; the engine must return before another request can start.':'Generating on device…')+'</p>':'');
 }
 
 let novaPendingContext = '';
@@ -433,18 +437,20 @@ function novaAiSend(){
  if(appContext&&appContext.startsWith('BUG_BOUNTY_ONLY.')){built.prompt=appContext+'\n\nUser request: '+message+'\nRespond only with program-relevant verified facts, unknowns and one proposed step. No unrelated profile data.';built.context_chars=appContext.length;built.route='bounty';}
  if(appContext&&appContext.startsWith('JOB_MATCH_ONLY.')){built.prompt=appContext+'\n\nUser request: '+message+'\nUse only job evidence and clearly state unknowns. Do not include unrelated personal history.';built.context_chars=appContext.length;built.route='job_match';}
  if(appContext&&appContext.startsWith('AGENT_TASK_ONLY.')){built.prompt=appContext+'\n\nUser request: '+message+'\nGive a concise, evidence-based plan with unknowns and approval checkpoints. Never claim a tool was executed. Ignore unrelated personal and job-profile data.';built.context_chars=appContext.length;built.route='agent_task';}
+ built.prompt=String(built.prompt||'').slice(0,3100);
  novaPendingContext='';
  novaAiMessages.push({role:'You',text:message});
- novaAiBusy=true;
+ novaAiBusy=true;novaAiCancelRequested=false;novaAiStalled=false;
  novaLastRoute=built.route;
- const id=++novaAiRequest;
+ const id=++novaAiRequest;novaAiWatch(id);
  if(novaDebugEnabled)novaDebugPending={id,start:Date.now(),route:built.route,context_chars:built.context_chars};
- try{Nova.novaGenerate(built.prompt,id)}catch(e){novaAiBusy=false;novaDebugPending=null;novaAiMessages.push({role:'NOVA',text:'Engine error: '+String(e)});}
+ try{Nova.novaGenerate(built.prompt,id)}catch(e){novaAiStopWatchdog();novaAiBusy=false;novaDebugPending=null;novaAiMessages.push({role:'NOVA',text:'Engine error: '+String(e)});}
  show('NOVA AI');
 }
-function novaAiCancel(){try{if(typeof Nova!=="undefined"&&Nova.novaCancelGeneration)Nova.novaCancelGeneration();}catch(e){console.warn("Cancellation unavailable",e);}}
+function novaAiCancel(){if(!novaAiBusy||novaAiCancelRequested)return;novaAiCancelRequested=true;try{if(typeof Nova!=="undefined"&&Nova.novaCancelGeneration)Nova.novaCancelGeneration();else throw Error('Native cancellation unavailable');}catch(e){novaAiCancelRequested=false;alert('Cancellation could not be requested: '+String(e));}show('NOVA AI');}
 function novaAiResult(id,ok,message){
  if(id!==novaAiRequest)return;
+ novaAiStopWatchdog();novaAiCancelRequested=false;novaAiStalled=false;
  if(novaDebugPending&&novaDebugPending.id===id){
   const p=novaDebugPending;
   novaDebugRuns.push({total_ms:Date.now()-p.start,route:p.route,context_chars:p.context_chars,output_chars:String(message||'').length,visible_chars:ok?novaCleanAnswer(message).length:0,ok:!!ok});
