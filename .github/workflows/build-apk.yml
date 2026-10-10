@@ -21,7 +21,15 @@ jobs:
         with:
           gradle-version: '8.9'
       - name: Install Android platform
-        run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+        shell: bash
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -type f -name sdkmanager -print -quit 2>/dev/null)"
+          if [ -z "$SDKMANAGER" ]; then
+            echo 'Android SDK command-line tools are missing' >&2
+            exit 1
+          fi
+          "$SDKMANAGER" 'platforms;android-35' 'build-tools;35.0.0'
       - name: Test dashboard
         run: node test.cjs && node test-interactions.cjs
       - name: Validate signing secrets
