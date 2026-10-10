@@ -98,6 +98,118 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
  private String enc(String s)throws Exception{return URLEncoder.encode(s,"UTF-8");}
  private String http(String url,JSONObject headers)throws Exception{URL u=new URL(url);if(!"https".equals(u.getProtocol()))throw new Exception("HTTPS required");HttpURLConnection c=(HttpURLConnection)u.openConnection();c.setConnectTimeout(12000);c.setReadTimeout(18000);c.setInstanceFollowRedirects(false);c.setRequestProperty("User-Agent","NOVA-JobHunter/1.1 (Android)");if(headers!=null){java.util.Iterator<String> keys=headers.keys();while(keys.hasNext()){String k=keys.next();c.setRequestProperty(k,headers.optString(k));}}try{int code=c.getResponseCode();if(code!=200)throw new Exception("Provider HTTP "+code);try(InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] buf=new byte[8192];int n;while((n=in.read(buf))!=-1){out.write(buf,0,n);if(out.size()>3500000)throw new Exception("Response too large");}return out.toString("UTF-8");}}finally{c.disconnect();}}
  private JSONObject profile(String provider)throws Exception{JSONObject profiles=credentials();String active=getPreferences(0).getString("active_"+provider,"default");return profiles.optJSONObject(provider+":"+active);}
+
+ private volatile boolean downloadCancelled = false;
+ private volatile boolean downloadBusy = false;
+
+ private void downloadEvent(String state, String message) {
+  runOnUiThread(() -> web.evaluateJavascript(
+   "novaDownloadEvent(" + JSONObject.quote(state) + "," +
+   JSONObject.quote(message) + ")", null));
+ }
+
+ private void downloadModel() {
+  synchronized(this) {
+   if(downloadBusy) return;
+   downloadBusy = true;
+   downloadCancelled = false;
+  }
+  new Thread(() -> {
+   File part = null;
+   HttpURLConnection connection = null;
+   try {
+    File dir = new File(getFilesDir(), "models");
+    if(!dir.exists() && !dir.mkdirs())
+     throw new IOException("Cannot create model directory");
+
+    File dest = new File(dir, "nova-model.gguf");
+    part = new File(dir, "nova-model.part");
+
+    URL url = new URL(
+     "https://huggingface.co/Qwen/Qwen3-4B-GGUF/resolve/main/Qwen3-4B-Q4_K_M.gguf?download=true"
+    );
+
+    for(int redirects = 0; redirects <= 5; redirects++) {
+     if(!"https".equalsIgnoreCase(url.getProtocol()))
+      throw new IOException("HTTPS required");
+
+     connection = (HttpURLConnection) url.openConnection();
+     connection.setInstanceFollowRedirects(false);
+     connection.setConnectTimeout(20000);
+     connection.setReadTimeout(30000);
+
+     int code = connection.getResponseCode();
+     if(code == 200) break;
+
+     if(code != 301 && code != 302 && code != 303 &&
+        code != 307 && code != 308)
+      throw new IOException("Model server HTTP " + code);
+
+     String location = connection.getHeaderField("Location");
+     if(location == null) throw new IOException("Invalid redirect");
+     URL next = new URL(url, location);
+     connection.disconnect();
+     connection = null;
+     url = next;
+     if(redirects == 5) throw new IOException("Too many redirects");
+    }
+
+    long size = connection.getContentLengthLong();
+    if(size < 1024 || size > 6000000000L)
+     throw new IOException("Unsupported model size");
+    if(dir.getUsableSpace() < size + 300000000L)
+     throw new IOException("Insufficient storage");
+
+    long total = 0;
+    int lastPercent = -1;
+    try(InputStream in = connection.getInputStream();
+        FileOutputStream out = new FileOutputStream(part, false)) {
+     byte[] buffer = new byte[131072];
+     int n;
+     while((n = in.read(buffer)) != -1) {
+      if(downloadCancelled)
+       throw new InterruptedIOException("Download cancelled");
+      total += n;
+      if(total > size) throw new IOException("Size mismatch");
+      out.write(buffer, 0, n);
+
+      int percent = (int)(total * 100 / size);
+      if(percent != lastPercent) {
+       lastPercent = percent;
+       downloadEvent("progress", percent + "% downloaded");
+      }
+     }
+     out.getFD().sync();
+    }
+
+    if(total != size) throw new IOException("Incomplete download");
+    try(FileInputStream in = new FileInputStream(part)) {
+     byte[] magic = new byte[4];
+     if(in.read(magic) != 4 ||
+        magic[0] != 'G' || magic[1] != 'G' ||
+        magic[2] != 'U' || magic[3] != 'F')
+      throw new IOException("Invalid GGUF file");
+    }
+
+    if(downloadCancelled)
+     throw new InterruptedIOException("Download cancelled");
+    if(dest.exists()) {
+     throw new IOException("A model is already installed. Remove it explicitly before downloading a replacement.");
+    }
+    if(!part.renameTo(dest))
+     throw new IOException("Cannot finish installation");
+
+    downloadEvent("done", "Model installed successfully");
+   } catch(Exception e) {
+    if(part != null) part.delete();
+    downloadEvent("error", String.valueOf(e.getMessage()));
+   } finally {
+    if(connection != null) connection.disconnect();
+    downloadBusy = false;
+   }
+  }, "nova-model-downloader").start();
+ }
+
  public class Bridge{
  @JavascriptInterface public void novaGenerate(String prompt,int id){
   if(prompt==null||prompt.isEmpty()||prompt.length()>5000){reply("novaAiResult",id,false,"Invalid prompt");return;}
@@ -113,6 +225,8 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
   },"nova-ai").start();
  }
 
+ @JavascriptInterface public void novaDownloadModel(){downloadModel();}
+ @JavascriptInterface public void novaCancelDownload(){downloadCancelled=true;}
  @JavascriptInterface public void pickModel(){runOnUiThread(()->{try{Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,MODEL_PICK);}catch(Exception e){modelResult(false,"Picker unavailable");}});}
  @JavascriptInterface public void pickResume(){runOnUiThread(()->{try{Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);i.putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"application/pdf","application/vnd.openxmlformats-officedocument.wordprocessingml.document","text/plain"});startActivityForResult(i,RESUME_PICK);}catch(Exception e){resumeResult(false,"Document picker unavailable");}});}
 
