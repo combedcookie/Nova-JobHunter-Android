@@ -350,6 +350,30 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
   }catch(Exception e){reply("novaAgentToolResult",id,false,e.getMessage()==null?"Hash failed":e.getMessage());}
  }
 
+
+ // NOVA_SECURITY_LAB_V1: mock API only; no network calls or user secrets.
+ @JavascriptInterface public void novaLabRequest(String path,String account,int id){
+  runOnUiThread(()->{
+   if(path==null||!path.matches("/api/orders/(demo-101|demo-102)")||!("A".equals(account)||"B".equals(account))){reply("novaLabResult",id,false,"Only mock demo-101/demo-102 and test accounts A/B are permitted");return;}
+   final String approvedPath=path,approvedAccount=account;
+   new android.app.AlertDialog.Builder(MainActivity.this)
+    .setTitle("Approve one local lab request")
+    .setMessage("Mock request: GET "+approvedPath+"\nTest account: "+approvedAccount+"\n\nThis is a built-in simulation. No external network request will occur. Approve this exact action once?")
+    .setNegativeButton("Reject",(dialog,which)->reply("novaLabResult",id,false,"Rejected by user"))
+    .setOnCancelListener(dialog->reply("novaLabResult",id,false,"Cancelled by user"))
+    .setPositiveButton("Approve once",(dialog,which)->{
+     try{
+      String owner=approvedPath.endsWith("101")?"A":"B";
+      JSONObject r=new JSONObject().put("environment","offline_mock").put("request","GET "+approvedPath).put("account",approvedAccount)
+       .put("status",owner.equals(approvedAccount)?200:403)
+       .put("body",owner.equals(approvedAccount)?new JSONObject().put("order",approvedPath.substring(12)).put("owner",owner).put("item","Lab sample"):new JSONObject().put("error","Access denied"))
+       .put("approved_once",true).put("network_used",false).put("timestamp",System.currentTimeMillis());
+      reply("novaLabResult",id,true,r.toString());
+     }catch(Exception e){reply("novaLabResult",id,false,"Lab simulation failed");}
+    }).show();
+  });
+ }
+
  @JavascriptInterface public void open(String url){runOnUiThread(()->openExternal(url));}
  }
  @Override public void onBackPressed(){if(web.canGoBack())web.goBack();else super.onBackPressed();}
