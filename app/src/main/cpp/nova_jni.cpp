@@ -58,11 +58,12 @@ Java_com_nova_jobhunter_MainActivity_nativeGenerate(JNIEnv *env, jclass,
     try {
         std::lock_guard<std::mutex> lock(engine_mutex);
         ensure_loaded(path.value);
+        // NOVA_NONTHINK_V1: Qwen3 /no_think; preserve native inference semantics.
         // Each request is independent; clear prior KV state but retain model weights.
         llama_memory_clear(llama_get_memory(cached_context), true);
         const llama_vocab *vocab = llama_model_get_vocab(cached_model);
-        std::string input = std::string("<|im_start|>system\nYou are NOVA, a private offline assistant. Answer accurately.\n<|im_end|>\n<|im_start|>user\n")
-            + prompt.value + "<|im_end|>\n<|im_start|>assistant\n";
+        std::string input = std::string("<|im_start|>system\nYou are NOVA, a private offline assistant. Answer accurately. Respond directly and concisely. For this app, do not output internal reasoning.\n<|im_end|>\n<|im_start|>user\n")
+            + prompt.value + "\n/no_think<|im_end|>\n<|im_start|>assistant\n";
         int required = llama_tokenize(vocab, input.c_str(), (int)input.size(), nullptr, 0, true, true);
         if (required >= 0 || -required > 1700) throw std::runtime_error("Prompt too long");
         std::vector<llama_token> tokens((size_t)-required);

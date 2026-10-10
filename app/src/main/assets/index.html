@@ -303,12 +303,16 @@ function novaAiResult(id,ok,message){
  if(id!==novaAiRequest)return;
  if(novaDebugPending&&novaDebugPending.id===id){
   const p=novaDebugPending;
-  novaDebugRuns.push({total_ms:Date.now()-p.start,route:p.route,context_chars:p.context_chars,output_chars:String(message||'').length,ok:!!ok});
+  novaDebugRuns.push({total_ms:Date.now()-p.start,route:p.route,context_chars:p.context_chars,output_chars:String(message||'').length,visible_chars:ok?novaCleanAnswer(message).length:0,ok:!!ok});
   if(novaDebugRuns.length>30)novaDebugRuns.shift();
   novaDebugPending=null;
  }
  novaAiBusy=false;
- novaAiMessages.push({role:'NOVA',text:ok?novaCleanAnswer(message):'Engine error: '+message});
+ // NOVA_NONTHINK_V1: never silently render an empty answer.
+ const raw=String(message||'');
+ const cleaned=ok?novaCleanAnswer(raw):'';
+ const visible=ok?(cleaned||'NOVA produced no visible answer. The model may have spent its output budget on reasoning; try a shorter prompt.'):('Engine error: '+raw);
+ novaAiMessages.push({role:'NOVA',text:visible});
  show('NOVA AI');
 }
 
