@@ -10,6 +10,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -29,7 +31,7 @@ jobs:
             echo 'Android SDK command-line tools are missing' >&2
             exit 1
           fi
-          "$SDKMANAGER" 'platforms;android-35' 'build-tools;35.0.0'
+          "$SDKMANAGER" 'platforms;android-35' 'build-tools;35.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1'
       - name: Test dashboard
         run: node test.cjs && node test-interactions.cjs
       - name: Validate signing secrets

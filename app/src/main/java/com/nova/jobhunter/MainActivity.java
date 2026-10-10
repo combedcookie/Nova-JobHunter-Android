@@ -28,6 +28,9 @@ import com.tom_roush.pdfbox.pdmodel.PDDocument;
 import com.tom_roush.pdfbox.text.PDFTextStripper;
 
 public class MainActivity extends Activity {
+ private static boolean novaEngineLoaded=false;
+ static {try {System.loadLibrary("nova_native");novaEngineLoaded=true;}catch(UnsatisfiedLinkError e){novaEngineLoaded=false;}}
+ private static native String nativeGenerate(String path,String prompt);
  private WebView web;
  private static final int RESUME_PICK=7301;
  private static final int MODEL_PICK=7302;
@@ -96,6 +99,20 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
  private String http(String url,JSONObject headers)throws Exception{URL u=new URL(url);if(!"https".equals(u.getProtocol()))throw new Exception("HTTPS required");HttpURLConnection c=(HttpURLConnection)u.openConnection();c.setConnectTimeout(12000);c.setReadTimeout(18000);c.setInstanceFollowRedirects(false);c.setRequestProperty("User-Agent","NOVA-JobHunter/1.1 (Android)");if(headers!=null){java.util.Iterator<String> keys=headers.keys();while(keys.hasNext()){String k=keys.next();c.setRequestProperty(k,headers.optString(k));}}try{int code=c.getResponseCode();if(code!=200)throw new Exception("Provider HTTP "+code);try(InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] buf=new byte[8192];int n;while((n=in.read(buf))!=-1){out.write(buf,0,n);if(out.size()>3500000)throw new Exception("Response too large");}return out.toString("UTF-8");}}finally{c.disconnect();}}
  private JSONObject profile(String provider)throws Exception{JSONObject profiles=credentials();String active=getPreferences(0).getString("active_"+provider,"default");return profiles.optJSONObject(provider+":"+active);}
  public class Bridge{
+ @JavascriptInterface public void novaGenerate(String prompt,int id){
+  if(prompt==null||prompt.isEmpty()||prompt.length()>5000){reply("novaAiResult",id,false,"Invalid prompt");return;}
+  if(!novaEngineLoaded){reply("novaAiResult",id,false,"Native engine unavailable");return;}
+  new Thread(()->{
+   try{
+    java.io.File model=new java.io.File(new java.io.File(getFilesDir(),"models"),"nova-model.gguf");
+    if(!model.isFile())throw new Exception("Install a GGUF model first");
+    String answer=nativeGenerate(model.getAbsolutePath(),prompt);
+    if(answer.startsWith("NOVA_ENGINE_ERROR:"))throw new Exception(answer);
+    reply("novaAiResult",id,true,answer);
+   }catch(Exception e){reply("novaAiResult",id,false,e.getMessage()==null?"Generation failed":e.getMessage());}
+  },"nova-ai").start();
+ }
+
  @JavascriptInterface public void pickModel(){runOnUiThread(()->{try{Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,MODEL_PICK);}catch(Exception e){modelResult(false,"Picker unavailable");}});}
  @JavascriptInterface public void pickResume(){runOnUiThread(()->{try{Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);i.putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"application/pdf","application/vnd.openxmlformats-officedocument.wordprocessingml.document","text/plain"});startActivityForResult(i,RESUME_PICK);}catch(Exception e){resumeResult(false,"Document picker unavailable");}});}
 
