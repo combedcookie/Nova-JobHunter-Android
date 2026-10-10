@@ -85,6 +85,17 @@ public class MainActivity extends Activity {
   return xml.replace("&amp;","&").replace("&lt;","<").replace("&gt;",">").replace("&quot;","\"").replace("&apos;","'");
  }
 
+ private static final String COPILOT_CHANNEL="nova_copilot_tasks";
+ private void copilotNotify(String title,String message){
+  if(android.os.Build.VERSION.SDK_INT>=33 && checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)return;
+  android.app.NotificationManager nm=(android.app.NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+  if(android.os.Build.VERSION.SDK_INT>=26)nm.createNotificationChannel(new android.app.NotificationChannel(COPILOT_CHANNEL,"NOVA task updates",android.app.NotificationManager.IMPORTANCE_DEFAULT));
+  Intent intent=new Intent(this,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+  android.app.PendingIntent pi=android.app.PendingIntent.getActivity(this,0,intent,android.app.PendingIntent.FLAG_UPDATE_CURRENT|android.app.PendingIntent.FLAG_IMMUTABLE);
+  android.app.Notification.Builder b=android.os.Build.VERSION.SDK_INT>=26?new android.app.Notification.Builder(this,COPILOT_CHANNEL):new android.app.Notification.Builder(this);
+  b.setSmallIcon(android.R.drawable.ic_dialog_info).setContentTitle(title).setContentText(message).setAutoCancel(true).setContentIntent(pi);
+  nm.notify((int)(System.currentTimeMillis()%100000),b.build());
+ }
  private static final String KEY_ALIAS="nova_provider_credentials_v1";
  @Override public void onCreate(Bundle b){super.onCreate(b);getWindow().setStatusBarColor(0xfff1e9db);getWindow().setNavigationBarColor(0xfff1e9db);
  web=new WebView(this); WebSettings s=web.getSettings();s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setAllowFileAccess(true);s.setAllowFileAccessFromFileURLs(false);s.setAllowUniversalAccessFromFileURLs(false);s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
@@ -402,6 +413,14 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
    }).start()).show());
  }
 
+ @JavascriptInterface public void novaCopilotNotify(String title,String detail){
+  if(title==null||detail==null||title.length()>100||detail.length()>300)return;
+  runOnUiThread(()->copilotNotify(title,detail));
+ }
+ @JavascriptInterface public void novaCopilotPermission(){runOnUiThread(()->{
+  if(android.os.Build.VERSION.SDK_INT>=33 && checkSelfPermission("android.permission.POST_NOTIFICATIONS")!=android.content.pm.PackageManager.PERMISSION_GRANTED)
+   requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"},8743);
+ });}
  @JavascriptInterface public void open(String url){runOnUiThread(()->openExternal(url));}
  }
  @Override public void onBackPressed(){if(web.canGoBack())web.goBack();else super.onBackPressed();}
