@@ -256,7 +256,13 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
    JSONObject headers=new JSONObject().put("Authorization","Basic "+basic).put("Accept","application/json");
    String base="https://api.hackerone.com/v1/hackers/programs/"+handle;
    JSONObject out=new JSONObject().put("handle",handle);
-   out.put("program",new JSONObject(http(base,headers)).optJSONObject("data"));
+   JSONObject programResponse=new JSONObject(http(base,headers));
+   JSONObject program=programResponse.optJSONObject("data");
+   if(program==null)throw new Exception("HackerOne program endpoint returned no program object for handle "+handle+" (check API response/visibility)");
+   JSONObject attributes=program.optJSONObject("attributes");
+   String returnedHandle=attributes==null?"":attributes.optString("handle","");
+   if(!handle.equals(returnedHandle))throw new Exception("HackerOne program handle mismatch: requested "+handle+", received "+returnedHandle);
+   out.put("program",program);
    // Fetch structured scopes and exclusions separately; do not infer scope from the program name.
    for(String type:new String[]{"structured_scopes","scope_exclusions"}){
     try{JSONObject data=new JSONObject(http(base+"/"+type+"?page%5Bsize%5D=100",headers));
@@ -273,7 +279,7 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
       pages++;
      }
      out.put(type,collected);out.put(type+"_has_more",next!=null);
-    }catch(Exception e){out.put(type+"_error",e.getMessage());}
+    }catch(Exception e){out.put(type+"_error",type+" retrieval failed: "+e.getMessage());}
    }
    reply("novaH1DetailsResult",id,true,out.toString());
   }catch(Exception e){reply("novaH1DetailsResult",id,false,e.getMessage()==null?"Request failed":e.getMessage());}
