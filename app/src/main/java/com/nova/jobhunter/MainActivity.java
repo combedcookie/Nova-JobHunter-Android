@@ -14,9 +14,64 @@ import java.security.KeyStore;
 import javax.crypto.*;
 import javax.crypto.spec.GCMParameterSpec;
 import java.nio.charset.StandardCharsets;
+import android.app.Activity;
+import android.provider.OpenableColumns;
+import android.database.Cursor;
+import android.content.ContentResolver;
+import android.webkit.MimeTypeMap;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipEntry;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader;
+import com.tom_roush.pdfbox.pdmodel.PDDocument;
+import com.tom_roush.pdfbox.text.PDFTextStripper;
 
 public class MainActivity extends Activity {
  private WebView web;
+ private static final int RESUME_PICK=7301;
+ private static final int RESUME_LIMIT=8*1024*1024;
+ private void resumeResult(boolean ok,String message){runOnUiThread(()->web.evaluateJavascript("novaResumeImported("+ok+","+JSONObject.quote(message)+")",null));}
+ @Override protected void onActivityResult(int request,int result,Intent data){
+  super.onActivityResult(request,result,data);
+  if(request!=RESUME_PICK)return;
+  if(result!=RESULT_OK||data==null||data.getData()==null){resumeResult(false,"Import cancelled");return;}
+  Uri uri=data.getData();
+  new Thread(()->{try{
+   String mime=getContentResolver().getType(uri);
+   String name="resume";
+   try(Cursor c=getContentResolver().query(uri,null,null,null,null)){
+    if(c!=null&&c.moveToFirst()){int col=c.getColumnIndex(OpenableColumns.DISPLAY_NAME);if(col>=0)name=c.getString(col);}
+   }
+   if(name==null)name="resume";
+   String lower=name.toLowerCase(java.util.Locale.ROOT);
+   if(!(lower.endsWith(".txt")||lower.endsWith(".docx")||lower.endsWith(".pdf")))throw new Exception("Choose a TXT, DOCX or PDF resume");
+   ByteArrayOutputStream out=new ByteArrayOutputStream();
+   try(InputStream in=getContentResolver().openInputStream(uri)){
+    if(in==null)throw new Exception("Cannot open document");
+    byte[] buf=new byte[8192];int n;while((n=in.read(buf))!=-1){out.write(buf,0,n);if(out.size()>RESUME_LIMIT)throw new Exception("Resume exceeds 8 MB");}
+   }
+   byte[] bytes=out.toByteArray();String extracted;
+   if(lower.endsWith(".txt"))extracted=new String(bytes,StandardCharsets.UTF_8);
+   else if(lower.endsWith(".docx"))extracted=extractDocx(bytes);
+   else {PDFBoxResourceLoader.init(getApplicationContext());try(PDDocument pdf=PDDocument.load(bytes)){if(pdf.getNumberOfPages()>60)throw new Exception("PDF exceeds 60 pages");extracted=new PDFTextStripper().getText(pdf);}}
+   extracted=extracted.replace('\u0000',' ').trim();
+   if(extracted.isEmpty())throw new Exception("No selectable text found; scanned PDFs need OCR");
+   if(extracted.length()>35000)extracted=extracted.substring(0,35000);
+   resumeResult(true,extracted);
+  }catch(Exception e){resumeResult(false,e.getMessage()==null?"Resume import failed":e.getMessage());}}).start();
+ }
+ private String extractDocx(byte[] bytes)throws Exception{
+  String xml=null;
+  try(ZipInputStream zip=new ZipInputStream(new ByteArrayInputStream(bytes))){ZipEntry entry;while((entry=zip.getNextEntry())!=null){if("word/document.xml".equals(entry.getName())){
+   ByteArrayOutputStream out=new ByteArrayOutputStream();byte[] buf=new byte[4096];int n;while((n=zip.read(buf))!=-1){out.write(buf,0,n);if(out.size()>2000000)throw new Exception("DOCX XML too large");}xml=out.toString("UTF-8");break;
+  }}}
+  if(xml==null)throw new Exception("Invalid DOCX document");
+  xml=xml.replaceAll("</w:p>","\n").replaceAll("</w:tr>","\n").replaceAll("<w:tab[^>]*/>"," ");
+  xml=xml.replaceAll("<[^>]+>","");
+  return xml.replace("&amp;","&").replace("&lt;","<").replace("&gt;",">").replace("&quot;","\"").replace("&apos;","'");
+ }
+
  private static final String KEY_ALIAS="nova_provider_credentials_v1";
  @Override public void onCreate(Bundle b){super.onCreate(b);getWindow().setStatusBarColor(0xfff1e9db);getWindow().setNavigationBarColor(0xfff1e9db);
  web=new WebView(this); WebSettings s=web.getSettings();s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setAllowFileAccess(true);s.setAllowFileAccessFromFileURLs(false);s.setAllowUniversalAccessFromFileURLs(false);s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
@@ -38,6 +93,8 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
  private String http(String url,JSONObject headers)throws Exception{URL u=new URL(url);if(!"https".equals(u.getProtocol()))throw new Exception("HTTPS required");HttpURLConnection c=(HttpURLConnection)u.openConnection();c.setConnectTimeout(12000);c.setReadTimeout(18000);c.setInstanceFollowRedirects(false);c.setRequestProperty("User-Agent","NOVA-JobHunter/1.1 (Android)");if(headers!=null){java.util.Iterator<String> keys=headers.keys();while(keys.hasNext()){String k=keys.next();c.setRequestProperty(k,headers.optString(k));}}try{int code=c.getResponseCode();if(code!=200)throw new Exception("Provider HTTP "+code);try(InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] buf=new byte[8192];int n;while((n=in.read(buf))!=-1){out.write(buf,0,n);if(out.size()>3500000)throw new Exception("Response too large");}return out.toString("UTF-8");}}finally{c.disconnect();}}
  private JSONObject profile(String provider)throws Exception{JSONObject profiles=credentials();String active=getPreferences(0).getString("active_"+provider,"default");return profiles.optJSONObject(provider+":"+active);}
  public class Bridge{
+ @JavascriptInterface public void pickResume(){runOnUiThread(()->{try{Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);i.putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"application/pdf","application/vnd.openxmlformats-officedocument.wordprocessingml.document","text/plain"});startActivityForResult(i,RESUME_PICK);}catch(Exception e){resumeResult(false,"Document picker unavailable");}});}
+
  @JavascriptInterface public void saveProfile(String provider,String name,String json,int id){new Thread(()->{try{if(!provider.matches("adzuna|usajobs|hackerone")||!name.matches("[a-zA-Z0-9_-]{1,32}"))throw new Exception("Invalid provider/profile");JSONObject val=new JSONObject(json);JSONObject all=credentials();all.put(provider+":"+name,val);saveCredentials(all);getPreferences(0).edit().putString("active_"+provider,name).apply();reply("novaConfigResult",id,true,"Saved securely on this device");}catch(Exception e){reply("novaConfigResult",id,false,e.getMessage());}}).start();}
  @JavascriptInterface public void listProfiles(int id){new Thread(()->{try{JSONObject all=credentials(),out=new JSONObject();JSONArray names=new JSONArray();java.util.Iterator<String> it=all.keys();while(it.hasNext()){String key=it.next();String[] parts=key.split(":",2);if(parts.length==2)names.put(new JSONObject().put("provider",parts[0]).put("name",parts[1]));}out.put("profiles",names);for(String p:new String[]{"adzuna","usajobs","hackerone"})out.put("active_"+p,getPreferences(0).getString("active_"+p,"default"));reply("novaConfigResult",id,true,out.toString());}catch(Exception e){reply("novaConfigResult",id,false,e.getMessage());}}).start();}
  @JavascriptInterface public void activateProfile(String provider,String name,int id){new Thread(()->{try{if(credentials().optJSONObject(provider+":"+name)==null)throw new Exception("Profile not found");getPreferences(0).edit().putString("active_"+provider,name).apply();reply("novaConfigResult",id,true,"Activated");}catch(Exception e){reply("novaConfigResult",id,false,e.getMessage());}}).start();}
