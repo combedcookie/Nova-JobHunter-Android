@@ -33,7 +33,7 @@ jobs:
           fi
           "$SDKMANAGER" 'platforms;android-35' 'build-tools;35.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1'
       - name: Test dashboard
-        run: node test.cjs && node test-interactions.cjs
+        run: node --test test.cjs test-interactions.cjs test-ai-pipeline.cjs test-bounty-approval.cjs test-release-guards.cjs
       - name: Validate signing secrets
         env:
           KEYSTORE_B64: ${{ secrets.NOVA_KEYSTORE_BASE64 }}
@@ -44,6 +44,8 @@ jobs:
           test -n "$KEYSTORE_B64" && test -n "$KEYSTORE_PASSWORD" && test -n "$KEY_ALIAS" && test -n "$KEY_PASSWORD" || { echo 'Missing NOVA signing secrets'; exit 1; }
           printf '%s' "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/nova-release.jks"
           chmod 600 "$RUNNER_TEMP/nova-release.jks"
+      - name: Compile debug APK (native and Java validation)
+        run: gradle --no-daemon :app:assembleDebug
       - name: Compile signed release APK
         env:
           NOVA_KEYSTORE_PATH: ${{ runner.temp }}/nova-release.jks

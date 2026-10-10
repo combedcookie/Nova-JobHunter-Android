@@ -31,6 +31,8 @@ public class MainActivity extends Activity {
  private static boolean novaEngineLoaded=false;
  static {try {System.loadLibrary("nova_native");novaEngineLoaded=true;}catch(UnsatisfiedLinkError e){novaEngineLoaded=false;}}
  private static native String nativeGenerate(String path,String prompt);
+ private static native void nativeCancelGeneration();
+ private final java.util.concurrent.atomic.AtomicBoolean generationBusy = new java.util.concurrent.atomic.AtomicBoolean(false);
  private WebView web;
  private static final int RESUME_PICK=7301;
  private static final int MODEL_PICK=7302;
@@ -39,7 +41,12 @@ public class MainActivity extends Activity {
  private void resumeResult(boolean ok,String message){runOnUiThread(()->web.evaluateJavascript("novaResumeImported("+ok+","+JSONObject.quote(message)+")",null));}
  @Override protected void onActivityResult(int request,int result,Intent data){
   super.onActivityResult(request,result,data);
-  if(request==MODEL_PICK){if(result!=RESULT_OK||data==null||data.getData()==null){modelResult(false,"Cancelled");return;}Uri modelUri=data.getData();new Thread(()->{java.io.File tmp=null;try{String display="model.gguf";try(Cursor c=getContentResolver().query(modelUri,null,null,null,null)){if(c!=null&&c.moveToFirst()){int n=c.getColumnIndex(OpenableColumns.DISPLAY_NAME);if(n>=0)display=c.getString(n);}}if(display==null||!display.toLowerCase(java.util.Locale.ROOT).endsWith(".gguf"))throw new Exception("Select a .gguf model file");java.io.File dir=new java.io.File(getFilesDir(),"models");if(!dir.exists()&&!dir.mkdirs())throw new Exception("Cannot create model directory");tmp=new java.io.File(dir,"incoming.part");long total=0;try(InputStream in=getContentResolver().openInputStream(modelUri);FileOutputStream out=new FileOutputStream(tmp)){if(in==null)throw new Exception("Cannot open model");byte[] buf=new byte[65536];int n;while((n=in.read(buf))!=-1){total+=n;if(total>6000000000L)throw new Exception("Model exceeds 6 GB");out.write(buf,0,n);}out.getFD().sync();}if(total<1024)throw new Exception("Model file too small");try(FileInputStream check=new FileInputStream(tmp)){byte[] magic=new byte[4];if(check.read(magic)!=4||magic[0]!=71||magic[1]!=71||magic[2]!=85||magic[3]!=70)throw new Exception("Invalid GGUF header");}java.io.File dest=new java.io.File(dir,"nova-model.gguf");if(dest.exists()&&!dest.delete())throw new Exception("Cannot replace existing model");if(!tmp.renameTo(dest))throw new Exception("Cannot finalize model import");modelResult(true,"Stored privately ("+(total/1048576)+" MiB). Inference engine pending.");}catch(Exception e){if(tmp!=null)tmp.delete();modelResult(false,e.getMessage()==null?"Import failed":e.getMessage());}}).start();return;}
+  if(request==MODEL_PICK){if(generationBusy.get()){modelResult(false,"Wait for NOVA to finish generating before replacing the model");return;}if(result!=RESULT_OK||data==null||data.getData()==null){modelResult(false,"Cancelled");return;}Uri modelUri=data.getData();new Thread(()->{java.io.File tmp=null;try{String display="model.gguf";try(Cursor c=getContentResolver().query(modelUri,null,null,null,null)){if(c!=null&&c.moveToFirst()){int n=c.getColumnIndex(OpenableColumns.DISPLAY_NAME);if(n>=0)display=c.getString(n);}}if(display==null||!display.toLowerCase(java.util.Locale.ROOT).endsWith(".gguf"))throw new Exception("Select a .gguf model file");java.io.File dir=new java.io.File(getFilesDir(),"models");if(!dir.exists()&&!dir.mkdirs())throw new Exception("Cannot create model directory");tmp=new java.io.File(dir,"incoming.part");long total=0;try(InputStream in=getContentResolver().openInputStream(modelUri);FileOutputStream out=new FileOutputStream(tmp)){if(in==null)throw new Exception("Cannot open model");byte[] buf=new byte[65536];int n;while((n=in.read(buf))!=-1){total+=n;if(total>6000000000L)throw new Exception("Model exceeds 6 GB");out.write(buf,0,n);}out.getFD().sync();}if(total<1024)throw new Exception("Model file too small");try(FileInputStream check=new FileInputStream(tmp)){byte[] magic=new byte[4];if(check.read(magic)!=4||magic[0]!=71||magic[1]!=71||magic[2]!=85||magic[3]!=70)throw new Exception("Invalid GGUF header");}java.io.File dest=new java.io.File(dir,"nova-model.gguf");java.io.File previous=new java.io.File(dir,"nova-model.previous.gguf");
+    if(previous.exists()&&!previous.delete())throw new Exception("Cannot clear previous model backup");
+    boolean hadModel=dest.exists();
+    if(hadModel&&!dest.renameTo(previous))throw new Exception("Cannot preserve existing model");
+    if(!tmp.renameTo(dest)){if(hadModel&&!previous.renameTo(dest))throw new Exception("Model install failed; old model preserved at nova-model.previous.gguf");throw new Exception("Cannot finalize model import");}
+    if(previous.exists())previous.delete();modelResult(true,"Stored privately ("+(total/1048576)+" MiB).");}catch(Exception e){if(tmp!=null)tmp.delete();modelResult(false,e.getMessage()==null?"Import failed":e.getMessage());}}).start();return;}
   if(request!=RESUME_PICK)return;
   if(result!=RESULT_OK||data==null||data.getData()==null){resumeResult(false,"Import cancelled");return;}
   Uri uri=data.getData();
@@ -214,6 +221,7 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
  @JavascriptInterface public void novaGenerate(String prompt,int id){
   if(prompt==null||prompt.isEmpty()||prompt.length()>5000){reply("novaAiResult",id,false,"Invalid prompt");return;}
   if(!novaEngineLoaded){reply("novaAiResult",id,false,"Native engine unavailable");return;}
+  if(!generationBusy.compareAndSet(false,true)){reply("novaAiResult",id,false,"NOVA is already generating");return;}
   new Thread(()->{
    try{
     java.io.File model=new java.io.File(new java.io.File(getFilesDir(),"models"),"nova-model.gguf");
@@ -222,9 +230,11 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
     if(answer.startsWith("NOVA_ENGINE_ERROR:"))throw new Exception(answer);
     reply("novaAiResult",id,true,answer);
    }catch(Exception e){reply("novaAiResult",id,false,e.getMessage()==null?"Generation failed":e.getMessage());}
+   finally{generationBusy.set(false);}
   },"nova-ai").start();
  }
 
+ @JavascriptInterface public void novaCancelGeneration(){if(novaEngineLoaded)nativeCancelGeneration();}
  @JavascriptInterface public void novaDownloadModel(){downloadModel();}
  @JavascriptInterface public void novaCancelDownload(){downloadCancelled=true;}
  @JavascriptInterface public void pickModel(){runOnUiThread(()->{try{Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);i.setType("*/*");i.addCategory(Intent.CATEGORY_OPENABLE);startActivityForResult(i,MODEL_PICK);}catch(Exception e){modelResult(false,"Picker unavailable");}});}
@@ -250,21 +260,68 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
    // Fetch structured scopes and exclusions separately; do not infer scope from the program name.
    for(String type:new String[]{"structured_scopes","scope_exclusions"}){
     try{JSONObject data=new JSONObject(http(base+"/"+type+"?page%5Bsize%5D=100",headers));
-     out.put(type,data.optJSONArray("data")!=null?data.getJSONArray("data"):new JSONArray());
-     JSONObject links=data.optJSONObject("links");out.put(type+"_has_more",links!=null&&!links.isNull("next")&&!links.optString("next").isEmpty());
+     JSONArray collected=new JSONArray();int pages=0;String next=base+"/"+type+"?page%5Bsize%5D=100";
+     while(next!=null&&pages<10){
+      JSONObject page=pages==0?data:new JSONObject(http(next,headers));
+      JSONArray items=page.optJSONArray("data");if(items==null)throw new Exception("Scope response missing data array");
+      for(int i=0;i<items.length();i++)collected.put(items.get(i));
+      JSONObject links=page.optJSONObject("links");String link=links==null?"":links.optString("next","");
+      if(link.isEmpty()||"null".equals(link))next=null;
+      else {URL candidate=new URL(new URL(base+"/"+type),link);
+       if(!"https".equals(candidate.getProtocol())||!"api.hackerone.com".equalsIgnoreCase(candidate.getHost())||candidate.getPort()!=-1||!candidate.getPath().equals("/v1/hackers/programs/"+handle+"/"+type))throw new Exception("Unsafe pagination URL");
+       next=candidate.toString();}
+      pages++;
+     }
+     out.put(type,collected);out.put(type+"_has_more",next!=null);
     }catch(Exception e){out.put(type+"_error",e.getMessage());}
    }
    reply("novaH1DetailsResult",id,true,out.toString());
   }catch(Exception e){reply("novaH1DetailsResult",id,false,e.getMessage()==null?"Request failed":e.getMessage());}
  }).start();}
- @JavascriptInterface public void auditWebsite(String target,boolean authorized,int id){new Thread(()->{try{
- if(!authorized)throw new Exception("Confirm ownership or explicit authorization first");
+ // NOVA_NATIVE_AUDIT_APPROVAL_V2: native, target-specific, human approval.
+ // JavaScript authorization flags cannot bypass this Android confirmation.
+ @JavascriptInterface public void auditWebsite(String target,boolean authorized,int id){
+  runOnUiThread(()->{
+   String shown=target==null?"(missing target)":target;
+   if(shown.length()>300){reply("novaAuditResult",id,false,"Target too long");return;}
+   new android.app.AlertDialog.Builder(MainActivity.this)
+    .setTitle("Authorize passive website check")
+    .setMessage("Target: "+shown+"\n\nThis sends one HTTPS HEAD request to the target's root path and inspects response headers. Only continue if you have authorization and the target is in scope. NOVA AI cannot approve this action.")
+    .setNegativeButton("Cancel",(dialog,which)->reply("novaAuditResult",id,false,"Cancelled by user"))
+    .setOnCancelListener(dialog->reply("novaAuditResult",id,false,"Cancelled by user"))
+    .setPositiveButton("Authorize once",(dialog,which)->auditWebsiteApproved(target,authorized,id))
+    .show();
+  });
+ }
+ private void auditWebsiteApproved(String target,boolean authorized,int id){new Thread(()->{try{
+ // Android confirmation is the authoritative one-time approval; JS flags are not trusted.
+ if(target==null||target.length()>300)throw new Exception("Invalid target");
  URL u=new URL(target);if(!"https".equalsIgnoreCase(u.getProtocol())||u.getUserInfo()!=null||u.getPort()!=-1)throw new Exception("Use an HTTPS hostname without credentials or port");
- String host=u.getHost();if(host==null||host.length()>253||!host.contains(".")||host.equalsIgnoreCase("localhost")||host.endsWith(".local")||host.endsWith(".internal"))throw new Exception("Public HTTPS host required");
- java.net.InetAddress[] ips=java.net.InetAddress.getAllByName(host);for(java.net.InetAddress ip:ips){byte[] a=ip.getAddress();if(ip.isAnyLocalAddress()||ip.isLoopbackAddress()||ip.isSiteLocalAddress()||ip.isLinkLocalAddress()||ip.isMulticastAddress()||a.length==4&&((a[0]&255)==0||(a[0]&255)==100&&(a[1]&192)==64||(a[0]&255)==169&&(a[1]&255)==254))throw new Exception("Private or reserved host blocked");}
+ String host=u.getHost();if(host==null||host.length()>253||!host.contains(".")||host.equalsIgnoreCase("localhost")||host.endsWith(".local")||host.endsWith(".internal")||host.endsWith(".test")||host.endsWith(".invalid")||host.endsWith(".example"))throw new Exception("Public HTTPS host required");
+ java.net.InetAddress[] ips=java.net.InetAddress.getAllByName(host);for(java.net.InetAddress ip:ips){byte[] a=ip.getAddress();if(ip.isAnyLocalAddress()||ip.isLoopbackAddress()||ip.isSiteLocalAddress()||ip.isLinkLocalAddress()||ip.isMulticastAddress()||a.length==16&&(a[0]&254)==252||a.length==4&&((a[0]&255)==0||(a[0]&255)>=224||(a[0]&255)==100&&(a[1]&192)==64||(a[0]&255)==169&&(a[1]&255)==254||(a[0]&255)==192&&(a[1]&255)==0&&(a[2]&255)==0))throw new Exception("Private or reserved host blocked");}
  URL clean=new URL("https",host,"/");javax.net.ssl.HttpsURLConnection c=(javax.net.ssl.HttpsURLConnection)clean.openConnection();c.setRequestMethod("HEAD");c.setInstanceFollowRedirects(false);c.setConnectTimeout(8000);c.setReadTimeout(8000);c.setRequestProperty("User-Agent","NOVA-Authorized-Passive-Audit/1.2");
  JSONObject result=new JSONObject();try{int code=c.getResponseCode();result.put("host",host).put("http_status",code).put("checked_at",System.currentTimeMillis());JSONArray findings=new JSONArray();String[][] checks={{"Strict-Transport-Security","HSTS header not observed"},{"Content-Security-Policy","CSP header not observed"},{"X-Content-Type-Options","X-Content-Type-Options header not observed"},{"Referrer-Policy","Referrer-Policy header not observed"}};for(String[] check:checks){if(c.getHeaderField(check[0])==null)findings.put(check[1]);}result.put("observations",findings).put("note","Configuration observations only, not confirmed vulnerabilities. HEAD / only; verify scope and context manually.");}finally{c.disconnect();}reply("novaAuditResult",id,true,result.toString());
  }catch(Exception e){reply("novaAuditResult",id,false,e.getMessage()==null?"Audit failed":e.getMessage());}}).start();}
+
+ // NOVA_NATIVE_AGENT_STAGE2: bounded offline-only native tools
+ @JavascriptInterface public void novaAgentCapabilities(int id){
+  try{JSONObject x=new JSONObject().put("tools",new JSONArray().put("evidence_sha256")).put("network_tools",false).put("active_testing",false);
+   reply("novaAgentToolResult",id,true,x.toString());
+  }catch(Exception e){reply("novaAgentToolResult",id,false,"Capabilities unavailable");}
+ }
+ @JavascriptInterface public void novaAgentEvidenceHash(String content,int id){
+  try{
+   if(content==null||content.isEmpty()||content.length()>16000)throw new Exception("Evidence must be 1–16000 characters");
+   byte[] bytes=content.getBytes(StandardCharsets.UTF_8);
+   if(bytes.length>32768)throw new Exception("Evidence too large");
+   byte[] digest=java.security.MessageDigest.getInstance("SHA-256").digest(bytes);
+   StringBuilder hex=new StringBuilder();
+   for(byte b:digest)hex.append(String.format(java.util.Locale.ROOT,"%02x",b&255));
+   JSONObject x=new JSONObject().put("tool","evidence_sha256").put("sha256",hex.toString()).put("bytes",bytes.length).put("local_only",true);
+   reply("novaAgentToolResult",id,true,x.toString());
+  }catch(Exception e){reply("novaAgentToolResult",id,false,e.getMessage()==null?"Hash failed":e.getMessage());}
+ }
+
  @JavascriptInterface public void open(String url){runOnUiThread(()->openExternal(url));}
  }
  @Override public void onBackPressed(){if(web.canGoBack())web.goBack();else super.onBackPressed();}

@@ -5,11 +5,14 @@
 #include <stdexcept>
 #include <algorithm>
 #include <mutex>
+#include <atomic>
+#include <chrono>
 #include <memory>
 #include "llama.h"
 
 namespace {
 std::mutex engine_mutex;
+std::atomic<bool> cancel_requested{false};
 llama_model *cached_model = nullptr;
 llama_context *cached_context = nullptr;
 std::string cached_path;
@@ -57,6 +60,7 @@ Java_com_nova_jobhunter_MainActivity_nativeGenerate(JNIEnv *env, jclass,
     std::string output;
     try {
         std::lock_guard<std::mutex> lock(engine_mutex);
+        cancel_requested.store(false);
         ensure_loaded(path.value);
         // NOVA_NONTHINK_V1: Qwen3 /no_think; preserve native inference semantics.
         // Each request is independent; clear prior KV state but retain model weights.
@@ -78,7 +82,10 @@ Java_com_nova_jobhunter_MainActivity_nativeGenerate(JNIEnv *env, jclass,
         }
         // Reserve room for generation in the 2048-token context.
         const int max_new = std::min(256, 2048 - n - 1);
+        const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(120);
         for (int i = 0; i < max_new; ++i) {
+            if(cancel_requested.load())throw std::runtime_error("Generation cancelled");
+            if(std::chrono::steady_clock::now()>deadline)throw std::runtime_error("Generation time limit reached");
             llama_token tok = llama_sampler_sample(sampler.value, cached_context, -1);
             if (llama_vocab_is_eog(vocab, tok)) break;
             char piece[4096];
@@ -91,5 +98,19 @@ Java_com_nova_jobhunter_MainActivity_nativeGenerate(JNIEnv *env, jclass,
     } catch (const std::exception &e) {
         output = std::string("NOVA_ENGINE_ERROR: ") + e.what();
     }
-    return env->NewStringUTF(output.c_str());
+    // NewStringUTF requires modified UTF-8; construct Java UTF-8 string through byte[] instead.
+    jbyteArray bytes=env->NewByteArray((jsize)output.size());
+    if(!bytes)return nullptr;
+    env->SetByteArrayRegion(bytes,0,(jsize)output.size(),reinterpret_cast<const jbyte*>(output.data()));
+    jclass stringClass=env->FindClass("java/lang/String");
+    if(!stringClass)return nullptr;
+    jmethodID ctor=env->GetMethodID(stringClass,"<init>","([BLjava/lang/String;)V");
+    if(!ctor)return nullptr;
+    jstring charset=env->NewStringUTF("UTF-8");
+    return (jstring)env->NewObject(stringClass,ctor,bytes,charset);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_nova_jobhunter_MainActivity_nativeCancelGeneration(JNIEnv *, jclass) {
+    cancel_requested.store(true);
 }
