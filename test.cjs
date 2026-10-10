@@ -1,11 +1,11 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const html=fs.readFileSync('app/src/main/assets/index.html','utf8');
 assert.match(html, /id="nav"/);assert.match(html,/id="content"/);
-const js=html.match(/<script>([\s\S]*?)<\/script>/)[1];new vm.Script(js);
+const js=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].at(-1)[1];new vm.Script(js);
 const store=new Map(),calls=[],els={};
 const get=id=>els[id] ||= {innerHTML:'',value:'',checked:false,textContent:'',classList:{toggle(){},remove(){}}};
 const bridge={listProfiles(...x){calls.push(['listProfiles',...x])},searchProvider(...x){calls.push(['searchProvider',...x])},saveProfile(...x){calls.push(['saveProfile',...x])},open(...x){calls.push(['open',...x])},auditWebsite(...x){calls.push(['auditWebsite',...x])}};
-const ctx=vm.createContext({document:{getElementById:get,querySelectorAll(){return []}},window:{Nova:bridge},Nova:bridge,localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},alert(){},confirm(){return true},console,Date,JSON,encodeURIComponent,decodeURIComponent});
+const ctx=vm.createContext({document:{getElementById:get,querySelectorAll(){return []}},window:{Nova:bridge,addEventListener(){}},Nova:bridge,localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},alert(){},confirm(){return true},console,Date,JSON,encodeURIComponent,decodeURIComponent});
 const run=x=>vm.runInContext(x,ctx);
 vm.runInContext(js,ctx);
 for(const t of ['Overview','Jobs','BugHunter','Applications','Learn','Audit','Settings']){run(`show('${t}')`);assert.ok(get('content').innerHTML.length>80,`${t} empty`);console.log('PASS tab',t)}

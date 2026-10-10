@@ -1,6 +1,6 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
 const html=fs.readFileSync('app/src/main/assets/index.html','utf8');
-const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
+const script=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].at(-1)[1];
 const functions=new Set([...script.matchAll(/\bfunction\s+(\w+)\s*\(/g)].map(x=>x[1]));
 const native=new Set([...fs.readFileSync('app/src/main/java/com/nova/jobhunter/MainActivity.java','utf8').matchAll(/@JavascriptInterface\s+public\s+\w+\s+(\w+)\s*\(/g)].map(x=>x[1]));
 const actions=[...html.matchAll(/\bon(click|change|input|submit)="([^"]*)"/g)].map(x=>x[2]);
@@ -11,7 +11,7 @@ console.log('PASS inline event patterns',actions.length,'and Android bridge');
 const els={},store=new Map(),calls=[];
 const get=id=>els[id]||= {value:'',checked:false,textContent:'',classList:{toggle(){},remove(){}},get innerHTML(){return this._html||''},set innerHTML(s){this._html=s;if(id==='content'){for(const k of ['location','q','provider','status','results','sp','fields','profiles','configStatus','bn','bu','auditTarget','auditConsent','auditResult','work','type','salary','level'])delete els[k];}}};
 const bridge={searchProvider(...x){calls.push(['searchProvider',...x])},listProfiles(...x){calls.push(['listProfiles',...x])},saveProfile(...x){calls.push(['saveProfile',...x])},activateProfile(...x){calls.push(['activateProfile',...x])},deleteProfile(...x){calls.push(['deleteProfile',...x])},open(...x){calls.push(['open',...x])},auditWebsite(...x){calls.push(['auditWebsite',...x])}};
-const ctx=vm.createContext({document:{getElementById:get,querySelectorAll(){return []}},window:{Nova:bridge},Nova:bridge,localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},alert(){},confirm(){return true},console,Date,JSON,encodeURIComponent,decodeURIComponent});
+const ctx=vm.createContext({document:{getElementById:get,querySelectorAll(){return []}},window:{Nova:bridge,addEventListener(){}},Nova:bridge,localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},alert(){},confirm(){return true},console,Date,JSON,encodeURIComponent,decodeURIComponent});
 const run=s=>vm.runInContext(s,ctx);
 vm.runInContext(script,ctx);
 for(const t of ['Overview','Jobs','BugHunter','Applications','Learn','Audit','Settings']){run(`show('${t}')`);assert(get('content').innerHTML.length>60);}
