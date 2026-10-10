@@ -258,10 +258,13 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
    JSONObject out=new JSONObject().put("handle",handle);
    JSONObject programResponse=new JSONObject(http(base,headers));
    JSONObject program=programResponse.optJSONObject("data");
-   if(program==null)throw new Exception("HackerOne program endpoint returned no program object for handle "+handle+" (check API response/visibility)");
+   if(program==null){
+    String shape=programResponse.has("errors")?"API returned errors collection":programResponse.has("error")?"API returned error object":programResponse.has("data")?"data is not an object":"data field absent";
+    throw new Exception("HackerOne detail response for "+handle+": "+shape+" (HTTP 200); scope not verified. Check program visibility and Hacker API access.");
+   }
    JSONObject attributes=program.optJSONObject("attributes");
    String returnedHandle=attributes==null?"":attributes.optString("handle","");
-   if(!handle.equals(returnedHandle))throw new Exception("HackerOne program handle mismatch: requested "+handle+", received "+returnedHandle);
+   if(!returnedHandle.isEmpty()&&!handle.equalsIgnoreCase(returnedHandle))throw new Exception("HackerOne program handle mismatch: requested "+handle+", received "+returnedHandle);
    out.put("program",program);
    // Fetch structured scopes and exclusions separately; do not infer scope from the program name.
    for(String type:new String[]{"structured_scopes","scope_exclusions"}){
