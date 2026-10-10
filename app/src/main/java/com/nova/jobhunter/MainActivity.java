@@ -235,6 +235,28 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
  @JavascriptInterface public void activateProfile(String provider,String name,int id){new Thread(()->{try{if(credentials().optJSONObject(provider+":"+name)==null)throw new Exception("Profile not found");getPreferences(0).edit().putString("active_"+provider,name).apply();reply("novaConfigResult",id,true,"Activated");}catch(Exception e){reply("novaConfigResult",id,false,e.getMessage());}}).start();}
  @JavascriptInterface public void deleteProfile(String provider,String name,int id){new Thread(()->{try{JSONObject all=credentials();all.remove(provider+":"+name);saveCredentials(all);reply("novaConfigResult",id,true,"Deleted");}catch(Exception e){reply("novaConfigResult",id,false,e.getMessage());}}).start();}
  @JavascriptInterface public void searchProvider(String provider,String query,String location,int id){new Thread(()->{try{String endpoint;JSONObject headers=null;JSONObject p=profile(provider);if(provider.equals("remotive")){endpoint="https://remotive.com/api/remote-jobs?limit=100&search="+enc(query);}else if(provider.equals("adzuna")){if(p==null)throw new Exception("Configure Adzuna in Settings");String appId=p.optString("id"),key=p.optString("key");if(appId.isEmpty()||key.isEmpty())throw new Exception("Adzuna ID and key required");endpoint="https://api.adzuna.com/v1/api/jobs/us/search/1?app_id="+enc(appId)+"&app_key="+enc(key)+"&results_per_page=50&what="+enc(query)+"&where="+enc(location);}else if(provider.equals("usajobs")){if(p==null)throw new Exception("Configure USAJOBS in Settings");headers=new JSONObject().put("Host","data.usajobs.gov").put("User-Agent",p.optString("email")).put("Authorization-Key",p.optString("key"));endpoint="https://data.usajobs.gov/api/search?Keyword="+enc(query)+"&LocationName="+enc(location)+"&ResultsPerPage=50";}else if(provider.equals("hackerone")){if(p==null)throw new Exception("Configure HackerOne in Settings");String username=p.optString("username"),token=p.optString("token");if(username.isEmpty()||token.isEmpty())throw new Exception("HackerOne credentials required");String basic=Base64.encodeToString((username+":"+token).getBytes(StandardCharsets.UTF_8),Base64.NO_WRAP);headers=new JSONObject().put("Authorization","Basic "+basic).put("Accept","application/json");endpoint="https://api.hackerone.com/v1/hackers/programs?page%5Bsize%5D=25";}else throw new Exception("Unknown provider");String data=http(endpoint,headers);reply("novaProviderResult",id,true,data);}catch(Exception e){reply("novaProviderResult",id,false,e.getMessage()==null?"Request failed":e.getMessage());}}).start();}
+ // NOVA_H1_DETAILS_V1: authenticated, read-only, bounded API retrieval.
+ @JavascriptInterface public void novaH1Details(String handle,int id){new Thread(()->{
+  try{
+   if(handle==null||!handle.matches("[a-zA-Z0-9_-]{1,80}"))throw new Exception("Invalid program handle");
+   JSONObject p=profile("hackerone");if(p==null)throw new Exception("Configure HackerOne credentials in Settings");
+   String user=p.optString("username"),token=p.optString("token");
+   if(user.isEmpty()||token.isEmpty())throw new Exception("HackerOne credentials required");
+   String basic=Base64.encodeToString((user+":"+token).getBytes(StandardCharsets.UTF_8),Base64.NO_WRAP);
+   JSONObject headers=new JSONObject().put("Authorization","Basic "+basic).put("Accept","application/json");
+   String base="https://api.hackerone.com/v1/hackers/programs/"+handle;
+   JSONObject out=new JSONObject().put("handle",handle);
+   out.put("program",new JSONObject(http(base,headers)).optJSONObject("data"));
+   // Fetch structured scopes and exclusions separately; do not infer scope from the program name.
+   for(String type:new String[]{"structured_scopes","scope_exclusions"}){
+    try{JSONObject data=new JSONObject(http(base+"/"+type+"?page%5Bsize%5D=100",headers));
+     out.put(type,data.optJSONArray("data")!=null?data.getJSONArray("data"):new JSONArray());
+     JSONObject links=data.optJSONObject("links");out.put(type+"_has_more",links!=null&&!links.isNull("next")&&!links.optString("next").isEmpty());
+    }catch(Exception e){out.put(type+"_error",e.getMessage());}
+   }
+   reply("novaH1DetailsResult",id,true,out.toString());
+  }catch(Exception e){reply("novaH1DetailsResult",id,false,e.getMessage()==null?"Request failed":e.getMessage());}
+ }).start();}
  @JavascriptInterface public void auditWebsite(String target,boolean authorized,int id){new Thread(()->{try{
  if(!authorized)throw new Exception("Confirm ownership or explicit authorization first");
  URL u=new URL(target);if(!"https".equalsIgnoreCase(u.getProtocol())||u.getUserInfo()!=null||u.getPort()!=-1)throw new Exception("Use an HTTPS hostname without credentials or port");
