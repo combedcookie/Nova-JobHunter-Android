@@ -248,8 +248,64 @@ let novaH1Batch=[];
 function novaH1BatchStart(){if(!programs.length){alert("Load HackerOne programs first");return;}novaH1Batch=programs.map((_,i)=>i).filter(i=>!novaH1DetailsCache[novaH1Handle(programs[i])]).slice(0,5);novaH1BatchNext()}
 function novaH1BatchNext(){if(!novaH1Batch.length)return;const i=novaH1Batch.shift();novaH1Research(i)}
 function novaH1Research(i){const b=programs[i];const handle=novaH1Handle(b);if(!handle||!window.Nova||typeof Nova.novaH1Details!=='function'){alert('Program details bridge unavailable; install updated APK');return;}const id=++novaH1DetailSeq;novaH1DetailPending.set(id,handle);providerError='Fetching official details for '+b.name+'…';show('BugHunter');Nova.novaH1Details(handle,id);setTimeout(()=>{if(novaH1DetailPending.has(id)){novaH1DetailPending.delete(id);providerError='Details request timed out; try again';show('BugHunter')}},45000)}
-function novaH1DetailsResult(id,ok,payload){const handle=novaH1DetailPending.get(id);if(!handle)return;novaH1DetailPending.delete(id);if(!ok){providerError='Program details for '+handle+': '+String(payload||'Request failed').replace(/(?:;?\s*scope not verified\.?)+$/i,'')+'; scope not verified.';show('BugHunter');if(novaH1Batch.length)setTimeout(novaH1BatchNext,1500);return;}try{const d=JSON.parse(payload);if(d.handle!==handle)throw Error('Program handle mismatch');if(!d.program||typeof d.program!=='object'){const detail=String(d.program_error||d.error||'Official program metadata missing');const scopeStatus=Array.isArray(d.structured_scopes)?'Scope API: '+d.structured_scopes.length+' entries'+(d.structured_scopes_has_more?' (partial)':''):'Scope API: '+String(d.structured_scopes_error||'unavailable');const exclusionsStatus=Array.isArray(d.scope_exclusions)?'Exclusions API: '+d.scope_exclusions.length+' entries'+(d.scope_exclusions_has_more?' (partial)':''):'Exclusions API: '+String(d.scope_exclusions_error||'unavailable');providerError='Program '+handle+': '+detail+' | '+scopeStatus+' | '+exclusionsStatus+'. Scope NOT verified; open Official rules.';show('BugHunter');if(novaH1Batch.length)setTimeout(novaH1BatchNext,1500);return;}d.fetched_at=new Date().toISOString();novaH1DetailsCache[handle]=d;try{localStorage.setItem('nova.h1.details.v1',JSON.stringify(novaH1DetailsCache))}catch(e){}providerError='Program details updated. Review scope and rules before launching.';show('BugHunter');if(novaH1Batch.length)setTimeout(novaH1BatchNext,1500)}catch(e){providerError='Program research unavailable for '+handle+': '+e.message+' — scope not verified. Open Official rules or retry.';show('BugHunter');if(novaH1Batch.length)setTimeout(novaH1BatchNext,1500)}}
+function novaH1DetailsResult(id,ok,payload){const handle=novaH1DetailPending.get(id);if(!handle)return;novaH1DetailPending.delete(id);if(novaManagerResearch&&novaManagerResearch.handle===handle){setTimeout(()=>{if(novaManagerResearch&&novaManagerResearch.handle===handle)novaManagerProducePlan()},0);}if(novaManagerResearch&&novaManagerResearch.handle===handle){novaManagerResearch.active=false;novaManagerResearch.status=ok?"Research retrieved; preparing plan":"Official research unavailable; preparing limited plan";}if(!ok){providerError='Program details for '+handle+': '+String(payload||'Request failed').replace(/(?:;?\s*scope not verified\.?)+$/i,'')+'; scope not verified.';show('BugHunter');if(novaH1Batch.length)setTimeout(novaH1BatchNext,1500);return;}try{const d=JSON.parse(payload);if(d.handle!==handle)throw Error('Program handle mismatch');if(!d.program||typeof d.program!=='object'){const detail=String(d.program_error||d.error||'Official program metadata missing');const scopeStatus=Array.isArray(d.structured_scopes)?'Scope API: '+d.structured_scopes.length+' entries'+(d.structured_scopes_has_more?' (partial)':''):'Scope API: '+String(d.structured_scopes_error||'unavailable');const exclusionsStatus=Array.isArray(d.scope_exclusions)?'Exclusions API: '+d.scope_exclusions.length+' entries'+(d.scope_exclusions_has_more?' (partial)':''):'Exclusions API: '+String(d.scope_exclusions_error||'unavailable');providerError='Program '+handle+': '+detail+' | '+scopeStatus+' | '+exclusionsStatus+'. Scope NOT verified; open Official rules.';show('BugHunter');if(novaH1Batch.length)setTimeout(novaH1BatchNext,1500);return;}d.fetched_at=new Date().toISOString();novaH1DetailsCache[handle]=d;try{localStorage.setItem('nova.h1.details.v1',JSON.stringify(novaH1DetailsCache))}catch(e){}providerError='Program details updated. Review scope and rules before launching.';show('BugHunter');if(novaH1Batch.length)setTimeout(novaH1BatchNext,1500)}catch(e){providerError='Program research unavailable for '+handle+': '+e.message+' — scope not verified. Open Official rules or retry.';show('BugHunter');if(novaH1Batch.length)setTimeout(novaH1BatchNext,1500)}}
 
+/* NOVA_MANAGER_RESEARCH_V1: automatic research, human-approved actions */
+let novaManagerResearch=null;
+function novaManagerStartResearch(b,handle){
+ const d=novaH1DetailsCache[handle];
+ const age=d&&d.fetched_at?Date.now()-Date.parse(d.fetched_at):Infinity;
+ novaManagerResearch={handle,active:false,status:'Preparing program research'};
+ if(!d||!Number.isFinite(age)||age>6*60*60*1000){
+  if(window.Nova&&typeof Nova.novaH1Details==='function'&&handle){
+   const id=++novaH1DetailSeq;
+   novaH1DetailPending.set(id,handle);
+   novaManagerResearch.active=true;novaManagerResearch.status='Refreshing official program API';
+   try{Nova.novaH1Details(handle,id)}catch(e){novaH1DetailPending.delete(id);novaManagerResearch.active=false;novaManagerResearch.status='Official API unavailable';}
+   setTimeout(()=>{
+    if(novaH1DetailPending.has(id)){
+     novaH1DetailPending.delete(id);novaManagerResearch.active=false;
+     novaManagerResearch.status='Official API timed out';novaManagerProducePlan();
+    }
+   },45000);
+   show('NOVA AI');return;
+  }
+  novaManagerResearch.status='Official API unavailable; using unverified cached information';
+ }else novaManagerResearch.status='Using recent official API snapshot';
+ novaManagerProducePlan();
+}
+function novaManagerProducePlan(){
+ if(!novaManagerResearch||novaManagerResearch.active||!novaInvestigation)return;
+ const x=novaInvestigation,d=novaH1DetailsCache[x.handle];
+ const a=d&&d.program&&d.program.attributes||{};
+ const scope=d&&Array.isArray(d.structured_scopes)?d.structured_scopes:[];
+ const excluded=d&&Array.isArray(d.scope_exclusions)?d.scope_exclusions:[];
+ const incomplete=!d||!!d.structured_scopes_has_more||!!d.structured_scopes_error||!!d.scope_exclusions_has_more||!!d.scope_exclusions_error;
+ const eligible=scope.filter(v=>v&&v.attributes&&v.attributes.eligible_for_submission===true);
+ const policy=String(a.policy||a.policy_html||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').slice(0,850);
+ const stamp=d&&d.fetched_at||'Unavailable';
+ const notebook=[
+  'MANAGER RESEARCH NOTEBOOK · '+x.name,
+  'Source: '+x.url,
+  'API snapshot: '+stamp+'; '+(incomplete?'INCOMPLETE / UNVERIFIED':'API RESPONSE PRESENT; CHECK LIVE POLICY BEFORE TESTING'),
+  'Submission-eligible assets in snapshot ('+eligible.length+'): '+(eligible.slice(0,12).map(v=>String(v.attributes.asset_identifier||'')).join('; ')||'none confirmed'),
+  'Exclusions ('+excluded.length+'): '+(excluded.slice(0,6).map(v=>String((v.attributes||{}).details||(v.attributes||{}).category||'')).join('; ')||'not available'),
+  'Policy excerpt: '+(policy||'Unavailable; do not assume testing permission'),
+  'Manager comments (unverified): '+x.comments,
+  'RESEARCH PLAN:',
+  '1. Read and reconcile the official policy and every relevant scope entry, including asset-specific instructions.',
+  '2. Identify one explicitly eligible target and its testing restrictions; stop if uncertain.',
+  '3. Prepare a minimal, non-destructive test proposal with target, method, expected requests, risks and stop conditions.',
+  '4. WAIT FOR MANAGER APPROVAL before any active request, scan, mutation or report submission.',
+  'First action: verify current rules and complete scope details. No active test has been executed.'
+ ].join('\n');
+ novaManagerResearch.status='Research notebook ready · active testing awaits approval';
+ novaAiMessages.push({role:'NOVA · Research notebook',text:notebook});
+ try{localStorage.setItem('nova.manager.notebook.v1',notebook)}catch(e){}
+ show('NOVA AI');
+ const input=document.getElementById('novaAiInput');
+ if(input){input.value='Using the research notebook above, propose the FIRST concrete, non-destructive investigation step, cite the source and uncertainties, and explain what requires my approval. Do not claim any test ran.';}
+}
 function novaH1Card(b,i){const saved=novaH1Saved.some(x=>x.url===b.url);const d=novaH1DetailsCache[b.handle||b.url.split('/').pop()];const a=d&&d.program&&d.program.attributes||{};const scopes=d&&d.structured_scopes||[];const eligible=scopes.filter(x=>x.attributes&&x.attributes.eligible_for_submission===true).length;const money=scopes.filter(x=>x.attributes&&x.attributes.eligible_for_bounty===true).length;const score=d?novaH1Score(d):null;return `<div class="item"><div class="name">${esc(b.name)}</div><p class="note">${d?('API snapshot (check freshness): '+eligible+' submission-eligible assets; '+money+' bounty-eligible assets'+(score!==null?'; research priority '+score+'/100':'')+'.'):'Scope, exclusions and reward eligibility not fetched yet.'}</p>${d?`<details class="nova-policy-details"><summary>View official scope, exclusions &amp; rules</summary>${novaH1Summary(d)}</details>`:''}<div class="nova-h1-actions"><button class="action secondary" onclick="novaH1Research(${i})">${d?'Refresh details':'Research program'}</button><button class="action secondary" onclick="novaH1Open(${i})">Official rules</button><button class="action secondary" onclick="novaH1Save(${i})">${saved?'Saved ✓':'Save'}</button><button class="action" onclick="novaH1Launch(${i})">Launch NOVA</button></div></div>`}
 function novaH1SavedHtml(){if(!novaH1Saved.length)return '<p class="note">No saved investigations.</p>';return novaH1Saved.map((x,i)=>`<div class="item"><strong>${esc(x.name)}</strong><p class="note">${esc(x.notes||'No notes yet')}</p><button class="action secondary" onclick="novaH1Resume(${i})">Resume</button><button class="action secondary" onclick="novaH1Edit(${i})">Edit notes and scope</button><button class="action secondary" onclick="novaH1Remove(${i})">Remove</button></div>`).join('')}
 function novaH1Open(i){const b=programs[i];if(b&&/^https:\/\/hackerone\.com\/[a-z0-9_-]+\/?$/i.test(b.url)&&window.Nova)Nova.open(b.url)}
@@ -278,7 +334,7 @@ function novaH1SendDraft(){
  novaInvestigation={name:b.name,url:b.url,handle,scope:scopeText,exclusions:exclusionText,partial:!d||!!d.structured_scopes_has_more||!!d.scope_exclusions_has_more||!!d.structured_scopes_error||!!d.scope_exclusions_error,comments};
  try{localStorage.setItem('nova.h1.active.v2',JSON.stringify(novaInvestigation))}catch(e){}
  novaAiMessages=[];novaPendingContext='';
- show('NOVA AI');const input=document.getElementById('novaAiInput');if(input){input.value='Review this HackerOne program and my comments. Separate verified facts from unknowns, then propose one permitted next step. Do not run tests.';input.focus();}
+ novaManagerStartResearch(b,handle);
 }
 
 function loadPrograms(){
