@@ -135,6 +135,17 @@ window.addEventListener('unhandledrejection', function(e) {
 
 
 // NOVA_CONSOLIDATED_20_V1
+
+/* Employee V1 handlers: implemented by the separate runtime module. */
+function novaEmpOpen(){if(typeof window.novaEmpOpen==="function")return window.novaEmpOpen.apply(window,arguments);}
+function novaEmpClose(){if(typeof window.novaEmpClose==="function")return window.novaEmpClose.apply(window,arguments);}
+function novaEmpAssign(){if(typeof window.novaEmpAssign==="function")return window.novaEmpAssign.apply(window,arguments);}
+function novaEmpExport(){if(typeof window.novaEmpExport==="function")return window.novaEmpExport.apply(window,arguments);}
+function novaEmpPolicy(){if(typeof window.novaEmpPolicy==="function")return window.novaEmpPolicy.apply(window,arguments);}
+function novaEmpVerified(){if(typeof window.novaEmpVerified==="function")return window.novaEmpVerified.apply(window,arguments);}
+function novaEmpPropose(){if(typeof window.novaEmpPropose==="function")return window.novaEmpPropose.apply(window,arguments);}
+function novaEmpExecute(){if(typeof window.novaEmpExecute==="function")return window.novaEmpExecute.apply(window,arguments);}
+function novaEmpReject(){if(typeof window.novaEmpReject==="function")return window.novaEmpReject.apply(window,arguments);}
 </script>
 <script>
 const tabs=['Overview','Finance','Jobs','Autopilot','NOVA AI','BugHunter','Applications','Learn','Audit','Agent Tasks','Settings'];let tab='Overview',jobs=[],query='',searched=false,loading=false,error='',req=0;let saved=load('nova.saved'),bounties=load('nova.bounties');let provider='remotive',jobLocation='Columbus, OH',configReq=0,providerReq=0,providerPending='',programs=[],providerError='';let auditReq=0,auditHistory=load('nova.auditHistory');let filters={work:'any',type:'any',salary:'0',level:'any'};

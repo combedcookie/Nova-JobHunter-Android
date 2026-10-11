@@ -1,6 +1,6 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');
 const html=fs.readFileSync('app/src/main/assets/index.html','utf8');
-const script=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].at(-1)[1];
+const script=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]).find(s=>/function\s+show\s*\(/.test(s));
 const functions=new Set([...script.matchAll(/\bfunction\s+(\w+)\s*\(/g)].map(x=>x[1]));
 const native=new Set([...fs.readFileSync('app/src/main/java/com/nova/jobhunter/MainActivity.java','utf8').matchAll(/@JavascriptInterface\s+public\s+\w+\s+(\w+)\s*\(/g)].map(x=>x[1]));
 const actions=[...html.matchAll(/\bon(click|change|input|submit)="([^"]*)"/g)].map(x=>x[2]);

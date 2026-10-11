@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 const html=fs.readFileSync('app/src/main/assets/index.html','utf8');
 assert.match(html, /id="nav"/);assert.match(html,/id="content"/);
-const js=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].at(-1)[1];new vm.Script(js);
+const js=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]).find(s=>/function\s+show\s*\(/.test(s));new vm.Script(js);
 const store=new Map(),calls=[],els={};
 const get=id=>els[id] ||= {innerHTML:'',value:'',checked:false,textContent:'',classList:{toggle(){},remove(){}}};
 const bridge={listProfiles(...x){calls.push(['listProfiles',...x])},searchProvider(...x){calls.push(['searchProvider',...x])},saveProfile(...x){calls.push(['saveProfile',...x])},open(...x){calls.push(['open',...x])},auditWebsite(...x){calls.push(['auditWebsite',...x])}};
