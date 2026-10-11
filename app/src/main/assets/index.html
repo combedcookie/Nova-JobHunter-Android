@@ -101,7 +101,23 @@ html,body{max-width:100%;overflow-x:hidden}
 .nova-hub button{min-height:96px;border:1px solid #315b74;background:#13293e;color:#e7f7ff;border-radius:14px;padding:14px;text-align:left;font:700 15px system-ui}
 .nova-hub button small{display:block;color:#a4c4d4;font:12px system-ui;margin-top:8px}
 @media(max-width:350px){.nova-hub{grid-template-columns:1fr}}
-</style><style id="nova-edge-safe-v2">body{padding-top:env(safe-area-inset-top, 0px);padding-bottom:env(safe-area-inset-bottom, 0px)}</style></head><body><header class="top"><span class="star">✦</span><span class="brand">NOVA BOARD</span><button class="menu" onclick="toggleMenu()" aria-label="Toggle menu">☰</button></header><div class="layout"><aside id="nav"></aside><main id="content"></main></div><nav id="novaBottomNav" class="nova-bottom-nav" aria-label="Primary navigation"></nav>
+</style><style id="nova-edge-safe-v2">body{padding-top:env(safe-area-inset-top, 0px);padding-bottom:env(safe-area-inset-bottom, 0px)}</style><style id="nova-future-fx-v1">
+/* NOVA_FUTURE_FX_V1 */
+:root{--nova-cyan:#00e5ff;--nova-violet:#9c7aff;--nova-mint:#28eab4}
+body{background:radial-gradient(ellipse 90% 35% at 50% -15%,#152e52 0%,transparent 100%),#090f1e!important;color:#e5f2ff}
+#content .item{border-color:#36536e!important;background:linear-gradient(145deg,rgba(24,42,64,.97),rgba(13,25,44,.97))!important;box-shadow:0 8px 24px #0003, inset 0 1px #8ac8ff0b;transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
+#content .item:focus-within{border-color:#48c9e5!important;box-shadow:0 0 0 1px #00e5ff55,0 0 24px #00e5ff1a}
+#content .action:not(.secondary){background:linear-gradient(115deg,#087c9d,#315fbb)!important;border-color:#35c9e5!important;color:#f7ffff!important;box-shadow:0 0 13px #00d5ff22;transition:box-shadow .2s ease,transform .2s ease}
+#content .action:not(.secondary):active{transform:scale(.985)}
+.nova-bottom-nav button.active{border-color:#00dfff!important;color:#a1f6ff!important;box-shadow:inset 0 0 17px #00dfff17,0 0 18px #00dfff38;animation:novaActiveGlow 3.5s ease-in-out infinite}
+.nova-bottom-nav button.active span{filter:drop-shadow(0 0 8px #00e5ff99)}
+#content [aria-label="Manager approval"]{border-color:#ffc267!important;box-shadow:0 0 20px #ffb34718}
+@keyframes novaActiveGlow{0%,100%{box-shadow:inset 0 0 13px #00dfff12,0 0 11px #00dfff24}50%{box-shadow:inset 0 0 23px #00dfff26,0 0 25px #00dfff55}}
+/* Android WebView status-bar protection; use one safe-area inset rather than stacking two. */
+@media(max-width:899px){html{scroll-padding-top:70px}body{padding-top:max(24px,env(safe-area-inset-top,0px))!important}.top{top:0!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+</style></head><body><header class="top"><span class="star">✦</span><span class="brand">NOVA BOARD</span><button class="menu" onclick="toggleMenu()" aria-label="Toggle menu">☰</button></header><div class="layout"><aside id="nav"></aside><main id="content"></main></div><nav id="novaBottomNav" class="nova-bottom-nav" aria-label="Primary navigation"></nav>
 <script>
 window.addEventListener('error', function(e) {
   var el = document.getElementById('content');
