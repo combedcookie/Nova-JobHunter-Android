@@ -804,4 +804,93 @@ function novaCopilotEvent(kind,title,detail,status){
 function novaCopilotRoute(kind){if(kind==='httpbin'||kind==='lab')show('Security Lab');else if(kind==='job')show('Jobs');else if(kind==='application')show('Applications');else show('Agent Tasks')}
 function novaCopilotRender(){let items=novaCopilotRead();return `<h1>NOVA Copilot</h1><p class="note">Guided actions, task history, and Android notifications. Tests and applications still require your approval.</p><button class="action secondary" onclick="Nova.novaCopilotPermission&&Nova.novaCopilotPermission()">Enable notifications</button><div class="item"><strong>Start a guided experiment</strong><p class="note">First run the safe mock authorization experiment, then the fixed HTTPBin HTTPS connectivity test.</p><button class="action" onclick="show('Security Lab')">Open lab workbench</button><button class="action secondary" onclick="novaCopilotGuide()">Walk me through first test</button></div><div class="item"><strong>Job search</strong><p class="note">Find opportunities and review applications. No automatic submission.</p><button class="action" onclick="show('Jobs')">Search jobs</button><button class="action secondary" onclick="show('Applications')">Review applications</button></div><h2>Recent task activity</h2>${items.length?items.map(x=>`<div class="item"><strong>${esc(x.title)}</strong><div class="meta">${esc(x.status)} · ${esc(x.at)}</div><p class="note">${esc(x.detail)}</p><button class="action secondary" onclick="novaCopilotRoute('${['httpbin','lab','job','application'].includes(x.kind)?x.kind:'task'}')">Open task</button></div>`).join(''):'<p class="note">No completed tasks recorded yet.</p>'}<button class="action secondary" onclick="novaCopilotEvent('task','Notification test','This is a local test notification','done')">Send test notification</button>`}
 function novaCopilotGuide(){novaPendingContext='GUIDED SECURITY LAB: The app supports a mock API authorization test and one fixed HTTPBin GET with native per-request approval. Neither is a real vulnerability. Give one step at a time, explain why, wait for user results, and never claim actions happened without evidence.';show('NOVA AI');let e=document.getElementById('novaAiInput');if(e)e.value='Guide me through my first approved mock authorization test, one step at a time, using the clickable Security Lab controls.'}
-</script></body></html>
+</script>
+<!-- nova-employee-runtime-v1 -->
+<style>
+#novaEmpLauncher{position:fixed;right:12px;bottom:85px;z-index:9000;background:#142747;color:#7ceaff;border:1px solid #51ddff;border-radius:30px;padding:12px;font:600 13px system-ui;box-shadow:0 0 18px #31ccff77}
+#novaEmpDesk{display:none;position:fixed;z-index:9001;inset:calc(env(safe-area-inset-top,0px) + 12px) 8px calc(env(safe-area-inset-bottom,0px) + 65px);background:#0b162a;color:#e8faff;overflow:auto;border:1px solid #46d6ff;border-radius:15px;padding:15px;font:14px/1.5 system-ui}
+#novaEmpDesk input,#novaEmpDesk textarea{display:block;width:100%;box-sizing:border-box;background:#152845;color:white;border:1px solid #4d7798;border-radius:7px;padding:9px;margin:7px 0}
+#novaEmpDesk button{background:#1b3656;color:#dffaff;border:1px solid #4ccaf2;border-radius:8px;padding:9px;margin:4px}
+#novaEmpDesk .novaEmpJob{border:1px solid #365777;border-radius:10px;padding:12px;margin:12px 0;background:#102039}
+#novaEmpDesk small{color:#a9c8dc}#novaEmpDesk h2{margin:4px 0;color:#6fe8ff}
+</style>
+<button id="novaEmpLauncher" onclick="novaEmpOpen()">&#x1f6e1; Employee #001</button>
+<section id="novaEmpDesk" role="dialog" aria-label="Employee #001 local operations desk" aria-modal="true">
+<button style="float:right" onclick="novaEmpClose()">Close</button>
+<h2>NOVA Company · Employee #001</h2>
+<p>Local research queue · owner-approved native execution · audit history</p>
+<label>HackerOne program handle<input id="novaEmpProgram" maxlength="80" placeholder="Program handle"></label>
+<label>Research goal<textarea id="novaEmpGoal" maxlength="500" rows="2" placeholder="Review official policy and scope"></textarea></label>
+<button onclick="novaEmpAssign()">Assign job</button>
+<button onclick="novaEmpExport()">Copy audit JSON</button>
+<div id="novaEmpJobs" aria-live="polite"></div>
+<p><small>Native tool currently connected: one fixed HTTPS GET to httpbin.org, with a second Android confirmation. This proves actual on-device execution, not vulnerability discovery. No arbitrary target testing.</small></p>
+</section>
+<script>
+(function(){
+'use strict';
+const KEY='nova.employee.jobs.v1', LIMIT=25;
+let pendingId=null;
+const escapeHtml=x=>String(x==null?'':x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function load(){try{let a=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(a)?a.slice(0,LIMIT):[]}catch(e){return []}}
+function save(a){try{localStorage.setItem(KEY,JSON.stringify(a.slice(0,LIMIT)));return true}catch(e){alert('Unable to persist employee jobs.');return false}}
+function event(j,m){j.updated=new Date().toISOString();j.events.push({at:j.updated,detail:m});j.events=j.events.slice(-60)}
+function edit(id,fn){let a=load(),j=a.find(x=>x.id===id);if(!j)return;fn(j);if(save(a))draw()}
+function draw(){
+let el=document.getElementById('novaEmpJobs');if(!el)return;
+let jobs=load();el.innerHTML='<h3>Assigned jobs ('+jobs.length+')</h3>'+(jobs.length?'':'<small>No jobs yet.</small>')+jobs.map(j=>'<article class="novaEmpJob"><strong>'+escapeHtml(j.goal)+'</strong><p><small>'+escapeHtml(j.program)+' · '+escapeHtml(j.status)+' · '+escapeHtml(j.updated)+'</small></p><p>'+escapeHtml(j.events.at(-1)?.detail||'')+'</p>'+
+(j.status==='awaiting_policy'?'<button onclick="novaEmpPolicy(\''+j.id+'\')">Open official policy</button>':'')+
+(j.status==='policy_opened'?'<button onclick="novaEmpVerified(\''+j.id+'\')">I verified policy and scope</button>':'')+
+(j.status==='scope_reviewed'?'<button onclick="novaEmpPropose(\''+j.id+'\')">Propose safe native test</button>':'')+
+(j.status==='awaiting_approval'?'<p><small>Proposal: one fixed GET https://httpbin.org/get?source=nova. No program target contacted.</small></p><button onclick="novaEmpExecute(\''+j.id+'\')">Approve and run</button><button onclick="novaEmpReject(\''+j.id+'\')">Reject</button>':'')+
+(j.status==='running'?'<p><small>Waiting for Android confirmation / network response.</small></p>':'')+
+'<details><summary>Audit log ('+j.events.length+')</summary>'+j.events.map(e=>'<p><small>'+escapeHtml(e.at)+' · '+escapeHtml(e.detail)+'</small></p>').join('')+'</details></article>').join('');
+}
+window.novaEmpOpen=()=>{document.getElementById('novaEmpDesk').style.display='block';draw()};
+window.novaEmpClose=()=>{document.getElementById('novaEmpDesk').style.display='none'};
+window.novaEmpAssign=()=>{
+const program=document.getElementById('novaEmpProgram').value.trim(),goal=document.getElementById('novaEmpGoal').value.trim()||'Review official program policy and scope';
+if(!/^[a-zA-Z0-9_-]{2,80}$/.test(program)){alert('Use a valid HackerOne program handle.');return}
+let a=load();if(a.length>=LIMIT){alert('Job limit reached. Export your history first.');return}
+const j={id:'e'+Date.now().toString(36)+Math.floor(Math.random()*100000).toString(36),program,goal,status:'awaiting_policy',created:new Date().toISOString(),updated:'',events:[]};
+event(j,'Job saved on this phone. No network activity yet.');a.unshift(j);if(save(a))draw();
+};
+window.novaEmpPolicy=id=>edit(id,j=>{
+if(j.status!=='awaiting_policy')return;
+j.status='policy_opened';event(j,'Owner opened official policy URL for manual review. No target testing authorized.');
+const url='https://hackerone.com/'+encodeURIComponent(j.program);
+try{if(window.Nova&&typeof Nova.open==='function')Nova.open(url);else window.open(url,'_blank','noopener,noreferrer')}catch(e){event(j,'Open URL manually: '+url)}
+});
+window.novaEmpVerified=id=>edit(id,j=>{if(j.status!=='policy_opened')return;j.status='scope_reviewed';event(j,'Owner marked official scope reviewed. No active testing authorization granted.')});
+window.novaEmpPropose=id=>edit(id,j=>{if(j.status!=='scope_reviewed')return;j.status='awaiting_approval';event(j,'Proposed fixed native connectivity test against httpbin.org only; awaiting approval.')});
+window.novaEmpReject=id=>edit(id,j=>{if(j.status!=='awaiting_approval')return;j.status='rejected';event(j,'Owner rejected native execution.')});
+window.novaEmpExecute=id=>{
+if(pendingId){alert('A native request is already pending.');return}
+const j=load().find(x=>x.id===id);if(!j||j.status!=='awaiting_approval')return;
+if(!window.Nova||typeof Nova.novaHttpbinTest!=='function'){alert('Native execution bridge not available. Install Android APK.');return}
+pendingId=id;edit(id,j=>{j.status='running';event(j,'Requested native HTTPS test. Android confirmation required; no result yet.')});
+try{Nova.novaHttpbinTest(901001)}catch(e){pendingId=null;edit(id,j=>{j.status='failed';event(j,'Could not invoke native bridge: '+String(e))})}
+};
+const original=window.novaHttpbinResult;
+window.novaHttpbinResult=function(id,ok,payload){
+if(id===901001&&pendingId){
+const jobId=pendingId;pendingId=null;
+edit(jobId,j=>{j.status=ok?'completed':'failed';let detail='Native result: '+(ok?'success':'failed')+'; '+String(payload).slice(0,2000);event(j,detail)});
+return;
+}
+if(typeof original==='function')return original.apply(this,arguments);
+};
+window.novaEmpExport=()=>{
+const json=JSON.stringify(load(),null,2);
+if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(json).then(()=>alert('Audit JSON copied.')).catch(()=>alert('Clipboard blocked; export unavailable.'));
+else alert('Clipboard unavailable in this WebView.');
+};
+window.addEventListener('pageshow',()=>{
+let a=load(),changed=false;
+a.forEach(j=>{if(j.status==='running'){j.status='interrupted';event(j,'App restarted during native execution. Result unknown; do not assume success.');changed=true}});
+if(changed)save(a);draw();
+});
+draw();
+})();
+</script>
+</body></html>
