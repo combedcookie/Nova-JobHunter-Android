@@ -366,23 +366,26 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
  }
 
 
- // NOVA_SECURITY_LAB_V1: mock API only; no network calls or user secrets.
+ // NOVA_SECURITY_LAB_V2: fixed allowlist, native per-request approval, offline only.
  @JavascriptInterface public void novaLabRequest(String path,String account,int id){
   runOnUiThread(()->{
-   if(path==null||!path.matches("/api/orders/(demo-101|demo-102)")||!("A".equals(account)||"B".equals(account))){reply("novaLabResult",id,false,"Only mock demo-101/demo-102 and test accounts A/B are permitted");return;}
+   if(path==null||!(path.equals("/api/orders/demo-101")||path.equals("/api/orders/demo-102")||path.equals("/api/users")||path.equals("/api/users/A")||path.equals("/api/users/B"))||!("A".equals(account)||"B".equals(account))){reply("novaLabResult",id,false,"Unsupported offline endpoint or account");return;}
    final String approvedPath=path,approvedAccount=account;
    new android.app.AlertDialog.Builder(MainActivity.this)
-    .setTitle("Approve one local lab request")
-    .setMessage("Mock request: GET "+approvedPath+"\nTest account: "+approvedAccount+"\n\nThis is a built-in simulation. No external network request will occur. Approve this exact action once?")
-    .setNegativeButton("Reject",(dialog,which)->reply("novaLabResult",id,false,"Rejected by user"))
-    .setOnCancelListener(dialog->reply("novaLabResult",id,false,"Cancelled by user"))
-    .setPositiveButton("Approve once",(dialog,which)->{
+    .setTitle("Approve one offline lab request")
+    .setMessage("GET "+approvedPath+"\nAccount: "+approvedAccount+"\n\nOffline mock only. No external network activity. Approve exactly this request once?")
+    .setNegativeButton("Reject",(d,w)->reply("novaLabResult",id,false,"Rejected by user"))
+    .setOnCancelListener(d->reply("novaLabResult",id,false,"Cancelled by user"))
+    .setPositiveButton("Approve once",(d,w)->{
      try{
-      String owner=approvedPath.endsWith("101")?"A":"B";
-      JSONObject r=new JSONObject().put("environment","offline_mock").put("request","GET "+approvedPath).put("account",approvedAccount)
-       .put("status",owner.equals(approvedAccount)?200:403)
-       .put("body",owner.equals(approvedAccount)?new JSONObject().put("order",approvedPath.substring(12)).put("owner",owner).put("item","Lab sample"):new JSONObject().put("error","Access denied"))
-       .put("approved_once",true).put("network_used",false).put("timestamp",System.currentTimeMillis());
+      String owner=approvedPath.endsWith("demo-101")?"A":approvedPath.endsWith("demo-102")?"B":approvedPath.endsWith("/A")?"A":approvedPath.endsWith("/B")?"B":approvedAccount;
+      boolean permitted=approvedPath.equals("/api/users")||owner.equals(approvedAccount);
+      JSONObject body;
+      if(!permitted)body=new JSONObject().put("error","Access denied");
+      else if(approvedPath.equals("/api/users"))body=new JSONObject().put("users",new JSONArray().put(new JSONObject().put("id",approvedAccount).put("role","lab_user")));
+      else if(approvedPath.startsWith("/api/users/"))body=new JSONObject().put("id",owner).put("role","lab_user");
+      else body=new JSONObject().put("order",approvedPath.substring("/api/orders/".length())).put("owner",owner).put("item","Lab sample");
+      JSONObject r=new JSONObject().put("environment","offline_mock").put("request","GET "+approvedPath).put("account",approvedAccount).put("status",permitted?200:403).put("body",body).put("approved_once",true).put("network_used",false).put("timestamp",System.currentTimeMillis());
       reply("novaLabResult",id,true,r.toString());
      }catch(Exception e){reply("novaLabResult",id,false,"Lab simulation failed");}
     }).show();
