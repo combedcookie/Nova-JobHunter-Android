@@ -367,6 +367,41 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
 
 
  // NOVA_SECURITY_LAB_V2: fixed allowlist, native per-request approval, offline only.
+
+ // ECLIPSE_WEB_LAB_V1: one approval authorizes the complete bounded OFFLINE lab suite.
+ @JavascriptInterface public void eclipseRunOfflineLab(int id){
+  runOnUiThread(()->new android.app.AlertDialog.Builder(MainActivity.this)
+   .setTitle("Approve Eclipse offline lab")
+   .setMessage("Run 8 local mock authorization checks against sample users A and B and demo orders? No external network, credentials, or live targets are used. Results are returned to Eclipse for review.")
+   .setNegativeButton("Cancel",(d,w)->reply("eclipseOfflineLabResult",id,false,"Cancelled by owner"))
+   .setOnCancelListener(d->reply("eclipseOfflineLabResult",id,false,"Cancelled by owner"))
+   .setPositiveButton("Approve lab",(d,w)->{
+    try{
+     JSONArray tests=new JSONArray();
+     String[] paths={"/api/users/A","/api/users/B","/api/users/A","/api/users/B","/api/orders/demo-101","/api/orders/demo-102","/api/orders/demo-101","/api/orders/demo-102"};
+     String[] actors={"A","B","B","A","A","B","B","A"};
+     int passes=0;
+     for(int i=0;i<paths.length;i++){
+      String owner=paths[i].endsWith("/A")||paths[i].endsWith("demo-101")?"A":"B";
+      boolean permitted=owner.equals(actors[i]);
+      int status=permitted?200:403;
+      boolean expected=(i<2||i==4||i==5)?status==200:status==403;
+      if(expected)passes++;
+      tests.put(new JSONObject().put("actor",actors[i]).put("method","GET")
+       .put("path",paths[i]).put("expected_status",permitted?200:403)
+       .put("observed_status",status).put("passed",expected)
+       .put("environment","offline_mock"));
+     }
+     JSONObject result=new JSONObject().put("environment","offline_mock")
+      .put("network_used",false).put("owner_approved",true)
+      .put("tests",tests).put("passed",passes).put("total",tests.length())
+      .put("finding_count",0).put("timestamp",System.currentTimeMillis())
+      .put("notice","Mock results verify the harness only; no real vulnerability or server was tested.");
+     reply("eclipseOfflineLabResult",id,true,result.toString());
+    }catch(Exception e){reply("eclipseOfflineLabResult",id,false,"Offline lab failed");}
+   }).show());
+ }
+
  @JavascriptInterface public void novaLabRequest(String path,String account,int id){
   runOnUiThread(()->{
    if(path==null||!(path.equals("/api/orders/demo-101")||path.equals("/api/orders/demo-102")||path.equals("/api/users")||path.equals("/api/users/A")||path.equals("/api/users/B"))||!("A".equals(account)||"B".equals(account))){reply("novaLabResult",id,false,"Unsupported offline endpoint or account");return;}
