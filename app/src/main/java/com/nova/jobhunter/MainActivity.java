@@ -100,8 +100,24 @@ public class MainActivity extends Activity {
   nm.notify((int)(System.currentTimeMillis()%100000),b.build());
  }
  private static final String KEY_ALIAS="nova_provider_credentials_v1";
- @Override public void onCreate(Bundle b){super.onCreate(b);getWindow().setStatusBarColor(0xfff1e9db);getWindow().setNavigationBarColor(0xfff1e9db);
- web=new WebView(this); WebSettings s=web.getSettings();s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setAllowFileAccess(true);s.setAllowFileAccessFromFileURLs(false);s.setAllowUniversalAccessFromFileURLs(false);s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+ @Override public void onCreate(Bundle b){super.onCreate(b);getWindow().setStatusBarColor(0xff0b1422);getWindow().setNavigationBarColor(0xff0b1422);
+ web=new WebView(this);
+ if(android.os.Build.VERSION.SDK_INT>=30){
+  getWindow().setDecorFitsSystemWindows(false);
+  web.setOnApplyWindowInsetsListener((v,insets)->{
+   android.graphics.Insets bars=insets.getInsets(android.view.WindowInsets.Type.statusBars()|android.view.WindowInsets.Type.navigationBars());
+   v.setPadding(0,bars.top,0,bars.bottom);
+   return insets;
+  });
+ }
+ // Dark status/navigation bars use light system icons.
+ if(android.os.Build.VERSION.SDK_INT>=30){
+  android.view.WindowInsetsController controller=getWindow().getInsetsController();
+  if(controller!=null)controller.setSystemBarsAppearance(0,android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS|android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS);
+ }else{
+  getWindow().getDecorView().setSystemUiVisibility(getWindow().getDecorView().getSystemUiVisibility() & ~android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+ }
+ WebSettings s=web.getSettings();s.setJavaScriptEnabled(true);s.setDomStorageEnabled(true);s.setAllowFileAccess(true);s.setAllowFileAccessFromFileURLs(false);s.setAllowUniversalAccessFromFileURLs(false);s.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
  web.setWebChromeClient(new WebChromeClient(){
  @Override public boolean onConsoleMessage(ConsoleMessage m){
   android.util.Log.d("NOVA_WEBVIEW",
@@ -257,8 +273,8 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
 
  @JavascriptInterface public void saveProfile(String provider,String name,String json,int id){new Thread(()->{try{if(!provider.matches("adzuna|usajobs|hackerone")||!name.matches("[a-zA-Z0-9_-]{1,32}"))throw new Exception("Invalid provider/profile");JSONObject val=new JSONObject(json);JSONObject all=credentials();all.put(provider+":"+name,val);saveCredentials(all);getPreferences(0).edit().putString("active_"+provider,name).apply();reply("novaConfigResult",id,true,"Saved securely on this device");}catch(Exception e){reply("novaConfigResult",id,false,e.getMessage());}}).start();}
  @JavascriptInterface public void listProfiles(int id){new Thread(()->{try{JSONObject all=credentials(),out=new JSONObject();JSONArray names=new JSONArray();java.util.Iterator<String> it=all.keys();while(it.hasNext()){String key=it.next();String[] parts=key.split(":",2);if(parts.length==2)names.put(new JSONObject().put("provider",parts[0]).put("name",parts[1]));}out.put("profiles",names);for(String p:new String[]{"adzuna","usajobs","hackerone"})out.put("active_"+p,getPreferences(0).getString("active_"+p,"default"));reply("novaConfigResult",id,true,out.toString());}catch(Exception e){reply("novaConfigResult",id,false,e.getMessage());}}).start();}
- @JavascriptInterface public void activateProfile(String provider,String name,int id){new Thread(()->{try{if(credentials().optJSONObject(provider+":"+name)==null)throw new Exception("Profile not found");getPreferences(0).edit().putString("active_"+provider,name).apply();reply("novaConfigResult",id,true,"Activated");}catch(Exception e){reply("novaConfigResult",id,false,e.getMessage());}}).start();}
- @JavascriptInterface public void deleteProfile(String provider,String name,int id){new Thread(()->{try{JSONObject all=credentials();all.remove(provider+":"+name);saveCredentials(all);reply("novaConfigResult",id,true,"Deleted");}catch(Exception e){reply("novaConfigResult",id,false,e.getMessage());}}).start();}
+ @JavascriptInterface public void activateProfile(String provider,String name,int id){new Thread(()->{try{if(provider==null||name==null||!provider.matches("adzuna|usajobs|hackerone")||!name.matches("[a-zA-Z0-9_-]{1,32}"))throw new Exception("Invalid provider/profile");if(credentials().optJSONObject(provider+":"+name)==null)throw new Exception("Profile not found");getPreferences(0).edit().putString("active_"+provider,name).apply();reply("novaConfigResult",id,true,"Activated");}catch(Exception e){reply("novaConfigResult",id,false,e.getMessage());}}).start();}
+ @JavascriptInterface public void deleteProfile(String provider,String name,int id){new Thread(()->{try{if(provider==null||name==null||!provider.matches("adzuna|usajobs|hackerone")||!name.matches("[a-zA-Z0-9_-]{1,32}"))throw new Exception("Invalid provider/profile");JSONObject all=credentials();if(!all.has(provider+":"+name))throw new Exception("Profile not found");all.remove(provider+":"+name);saveCredentials(all);if(name.equals(getPreferences(0).getString("active_"+provider,"default")))getPreferences(0).edit().remove("active_"+provider).apply();reply("novaConfigResult",id,true,"Deleted");}catch(Exception e){reply("novaConfigResult",id,false,e.getMessage());}}).start();}
  @JavascriptInterface public void searchProvider(String provider,String query,String location,int id){new Thread(()->{try{String endpoint;JSONObject headers=null;JSONObject p=profile(provider);if(provider.equals("remotive")){endpoint="https://remotive.com/api/remote-jobs?limit=100&search="+enc(query);}else if(provider.equals("adzuna")){if(p==null)throw new Exception("Configure Adzuna in Settings");String appId=p.optString("id"),key=p.optString("key");if(appId.isEmpty()||key.isEmpty())throw new Exception("Adzuna ID and key required");endpoint="https://api.adzuna.com/v1/api/jobs/us/search/1?app_id="+enc(appId)+"&app_key="+enc(key)+"&results_per_page=50&what="+enc(query)+"&where="+enc(location);}else if(provider.equals("usajobs")){if(p==null)throw new Exception("Configure USAJOBS in Settings");headers=new JSONObject().put("Host","data.usajobs.gov").put("User-Agent",p.optString("email")).put("Authorization-Key",p.optString("key"));endpoint="https://data.usajobs.gov/api/search?Keyword="+enc(query)+"&LocationName="+enc(location)+"&ResultsPerPage=50";}else if(provider.equals("hackerone")){if(p==null)throw new Exception("Configure HackerOne in Settings");String username=p.optString("username"),token=p.optString("token");if(username.isEmpty()||token.isEmpty())throw new Exception("HackerOne credentials required");String basic=Base64.encodeToString((username+":"+token).getBytes(StandardCharsets.UTF_8),Base64.NO_WRAP);headers=new JSONObject().put("Authorization","Basic "+basic).put("Accept","application/json");endpoint="https://api.hackerone.com/v1/hackers/programs?page%5Bsize%5D=25";}else throw new Exception("Unknown provider");String data=http(endpoint,headers);reply("novaProviderResult",id,true,data);}catch(Exception e){reply("novaProviderResult",id,false,e.getMessage()==null?"Request failed":e.getMessage());}}).start();}
  // NOVA_H1_DETAILS_V1: authenticated, read-only, bounded API retrieval.
  @JavascriptInterface public void novaH1Details(String handle,int id){new Thread(()->{
