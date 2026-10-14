@@ -1659,5 +1659,55 @@ function eclipseChallengeRun(){const out=document.getElementById('eclipse-challe
  const tp=rows.filter(x=>x.detected&&x.actual).length,fp=rows.filter(x=>x.detected&&!x.actual).length,fn=rows.filter(x=>!x.detected&&x.actual).length,tn=rows.filter(x=>!x.detected&&!x.actual).length;
  out.textContent='OFFLINE BLIND-TO-DETECTOR CHALLENGE\nNetwork used: NO\nFixtures: '+rows.length+' | Correct: '+rows.filter(x=>x.correct).length+'\nTrue positives: '+tp+' | False positives: '+fp+' | False negatives: '+fn+' | True negatives: '+tn+'\n\n'+rows.map(x=>(x.correct?'PASS':'FAIL')+' · '+x.asset+'\n  Owner HTTP '+x.owner_status+' / Other account HTTP '+x.other_status+'\n  Detector: '+(x.detected?'POTENTIAL AUTHORIZATION FLAW':'NO FLAW OBSERVED')+' | Answer key: '+(x.actual?'VULNERABLE':'SECURE')).join('\n\n')+'\n\nLIMITATION: This is a deterministic simulated API and rule-based detector, not autonomous AI discovery or a real vulnerability.';
 }
+
+/* ECLIPSE_V41_KNOWLEDGE_CORE */
+const eclipseKnowledgeV41=Object.freeze([
+ {id:'CWE-639',title:'Authorization Bypass Through User-Controlled Key',tags:['idor','authorization','ownership','api'],reference:'https://cwe.mitre.org/data/definitions/639.html',guidance:'Compare owner and non-owner access to the same object. A denial for the non-owner is expected.'},
+ {id:'CWE-862',title:'Missing Authorization',tags:['authorization','access-control','api'],reference:'https://cwe.mitre.org/data/definitions/862.html',guidance:'Check whether access is restricted to the authorized account or role.'},
+ {id:'CWE-863',title:'Incorrect Authorization',tags:['authorization','roles','access-control'],reference:'https://cwe.mitre.org/data/definitions/863.html',guidance:'Compare access decisions against the declared authorization policy.'},
+ {id:'CWE-287',title:'Improper Authentication',tags:['authentication','identity','session'],reference:'https://cwe.mitre.org/data/definitions/287.html',guidance:'Verify the authenticated identity is established before protected actions.'},
+ {id:'CWE-200',title:'Exposure of Sensitive Information',tags:['privacy','response','information-disclosure'],reference:'https://cwe.mitre.org/data/definitions/200.html',guidance:'Review returned data for unintended disclosure without copying secrets into AI context.'},
+ {id:'OWASP-API1-2023',title:'Broken Object Level Authorization',tags:['idor','authorization','ownership','api'],reference:'https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/',guidance:'Verify object ownership on each object-specific request.'},
+ {id:'OWASP-API2-2023',title:'Broken Authentication',tags:['authentication','session','api'],reference:'https://owasp.org/API-Security/editions/2023/en/0xa2-broken-authentication/',guidance:'Evaluate authentication checks and session handling against the approved test plan.'},
+ {id:'OWASP-API5-2023',title:'Broken Function Level Authorization',tags:['authorization','roles','api'],reference:'https://owasp.org/API-Security/editions/2023/en/0xa5-broken-function-level-authorization/',guidance:'Verify restricted functions are inaccessible to unauthorized roles.'}
+]);
+function eclipseKnowledgeSearchV41(query,limit){
+ const terms=String(query||'').toLowerCase().split(/[^a-z0-9-]+/).filter(Boolean).slice(0,12);
+ return eclipseKnowledgeV41.map(k=>({k,score:terms.reduce((n,t)=>n+(k.id.toLowerCase()===t?5:0)+(k.tags.some(v=>v.includes(t))?3:0)+(k.title.toLowerCase().includes(t)?2:0),0)}))
+ .filter(v=>v.score>0).sort((a,b)=>b.score-a.score||a.k.id.localeCompare(b.k.id)).slice(0,Math.max(1,Math.min(8,Number(limit)||3))).map(v=>v.k);
+}
+function eclipseEvidenceAssessmentV41(x){
+ const history=Array.isArray(x.history)?x.history:[];
+ const tests=history.filter(v=>v.ok&&Number.isInteger(v.status)&&Number.isInteger(v.expected));
+ const unexpected=tests.filter(v=>v.status!==v.expected);
+ const invalid=history.filter(v=>v.assessment==='unverified');
+ const covered=new Set(tests.map(v=>v.account+'|'+v.path));
+ const refs=eclipseKnowledgeSearchV41('authorization ownership api',3);
+ return {environment:'offline_mock',verified:tests.length,unique:covered.size,total:eclipseV4Plan.length,
+  unexpected:unexpected.length,unverified:invalid.length,
+  findings:unexpected.slice(-5).map(v=>({kind:'potential_mock_policy_mismatch',account:v.account,path:v.path,expected:v.expected,actual:v.status,confidence:'requires_review'})),
+  references:refs.map(k=>({id:k.id,title:k.title,url:k.reference})),
+  note:'These are simulated API checks, not evidence of a live vulnerability.'};
+}
+function eclipseKnowledgeHtmlV41(){
+ const x=eclipseLoopRead(),a=eclipseEvidenceAssessmentV41(x);
+ const lines=a.references.map(v=>'<div class="note">'+esc(v.id)+' · '+esc(v.title)+'</div>').join('');
+ return '<div class="item"><strong>Eclipse · Offline knowledge core</strong><p class="note">'+
+ 'Embedded CWE / OWASP reference summaries. No downloads or live scanning.</p>'+
+ '<p class="note">Verified mock results: '+a.verified+' · Unique: '+a.unique+'/'+a.total+
+ ' · Unexpected: '+a.unexpected+' · Unverified: '+a.unverified+'</p>'+lines+
+ '<p class="note">Potential mismatches require manual review; no live bounty finding is claimed.</p></div>';
+}
+function eclipseEvidenceCompactV41(){
+ const a=eclipseEvidenceAssessmentV41(eclipseLoopRead());
+ return JSON.stringify(a).slice(0,1600);
+}
+
+const eclipseLoopHtmlV40=eclipseLoopHtml;
+eclipseLoopHtml=function(){return eclipseLoopHtmlV40()+eclipseKnowledgeHtmlV41()};
+
+const eclipseV4EvidenceV40=eclipseV4Evidence;
+eclipseV4Evidence=function(){return (eclipseV4EvidenceV40()+"\nSECURITY_KNOWLEDGE_SUMMARY: "+eclipseEvidenceCompactV41()).slice(0,3500)};
+
 </script>
 </body></html>
