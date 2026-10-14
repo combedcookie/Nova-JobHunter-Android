@@ -32,6 +32,9 @@ public class MainActivity extends Activity {
  static {try {System.loadLibrary("nova_native");novaEngineLoaded=true;}catch(UnsatisfiedLinkError e){novaEngineLoaded=false;}}
  private static native String nativeGenerate(String path,String prompt);
  private static native void nativeCancelGeneration();
+
+ // ECLIPSE_V441_AI_COPILOT: local GGUF only; returns text, never invokes an HTTP tool.
+ private final java.util.concurrent.atomic.AtomicInteger eclipseV441AiActive=new java.util.concurrent.atomic.AtomicInteger(0);
  private final java.util.concurrent.atomic.AtomicBoolean generationBusy = new java.util.concurrent.atomic.AtomicBoolean(false);
  private WebView web;
  private static final int RESUME_PICK=7301;
@@ -101,12 +104,20 @@ public class MainActivity extends Activity {
  }
  private static final String KEY_ALIAS="nova_provider_credentials_v1";
  @Override public void onCreate(Bundle b){super.onCreate(b);getWindow().setStatusBarColor(0xff0b1422);getWindow().setNavigationBarColor(0xff0b1422);
+ // ECLIPSE_V441_SAFE_ROOT: shift the WebView viewport *inside* system bars.
+ // WebView padding alone let scrolled content and the fixed nav run behind OS icons.
+ final android.widget.FrameLayout eclipseV441SafeRoot=new android.widget.FrameLayout(this);
+ eclipseV441SafeRoot.setBackgroundColor(0xff0b1422);
  web=new WebView(this);
+ eclipseV441SafeRoot.addView(web,new android.widget.FrameLayout.LayoutParams(-1,-1));
  if(android.os.Build.VERSION.SDK_INT>=30){
   getWindow().setDecorFitsSystemWindows(false);
-  web.setOnApplyWindowInsetsListener((v,insets)->{
-   android.graphics.Insets bars=insets.getInsets(android.view.WindowInsets.Type.statusBars()|android.view.WindowInsets.Type.navigationBars());
-   v.setPadding(0,bars.top,0,bars.bottom);
+  eclipseV441SafeRoot.setOnApplyWindowInsetsListener((v,insets)->{
+   final int types=android.view.WindowInsets.Type.systemBars()|android.view.WindowInsets.Type.displayCutout();
+   android.graphics.Insets bars=insets.getInsets(types);
+   int keyboard=insets.isVisible(android.view.WindowInsets.Type.ime())
+    ?insets.getInsets(android.view.WindowInsets.Type.ime()).bottom:0;
+   v.setPadding(bars.left,bars.top,bars.right,Math.max(bars.bottom,keyboard));
    return insets;
   });
  }
@@ -126,7 +137,7 @@ public class MainActivity extends Activity {
   return true;
  }
 });
-web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebViewClient(){@Override public boolean shouldOverrideUrlLoading(WebView v,WebResourceRequest r){Uri u=r.getUrl();if(!"file".equals(u.getScheme())||!"android_asset".equals(u.getHost())){openExternal(u.toString());return true;}return false;}});setContentView(web);web.loadUrl("file:///android_asset/index.html");}
+web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebViewClient(){@Override public boolean shouldOverrideUrlLoading(WebView v,WebResourceRequest r){Uri u=r.getUrl();if(!"file".equals(u.getScheme())||!"android_asset".equals(u.getHost())){openExternal(u.toString());return true;}return false;}});setContentView(eclipseV441SafeRoot);web.loadUrl("file:///android_asset/index.html");}
  private void openExternal(String url){try{Uri u=Uri.parse(url);if(!"https".equalsIgnoreCase(u.getScheme()))return;startActivity(new Intent(Intent.ACTION_VIEW,u));}catch(Exception ignored){}}
  private synchronized SecretKey secret()throws Exception{KeyStore ks=KeyStore.getInstance("AndroidKeyStore");ks.load(null);if(!ks.containsAlias(KEY_ALIAS)){KeyGenerator g=KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES,"AndroidKeyStore");g.init(new KeyGenParameterSpec.Builder(KEY_ALIAS,KeyProperties.PURPOSE_ENCRYPT|KeyProperties.PURPOSE_DECRYPT).setBlockModes(KeyProperties.BLOCK_MODE_GCM).setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE).build());g.generateKey();}return ((KeyStore.SecretKeyEntry)ks.getEntry(KEY_ALIAS,null)).getSecretKey();}
  private synchronized JSONObject credentials()throws Exception{String stored=getPreferences(0).getString("encrypted_profiles","");if(stored.isEmpty())return new JSONObject();byte[] raw=Base64.decode(stored,Base64.NO_WRAP);byte[] iv=new byte[12];System.arraycopy(raw,0,iv,0,12);Cipher c=Cipher.getInstance("AES/GCM/NoPadding");c.init(Cipher.DECRYPT_MODE,secret(),new GCMParameterSpec(128,iv));return new JSONObject(new String(c.doFinal(raw,12,raw.length-12),StandardCharsets.UTF_8));}
@@ -253,6 +264,7 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
   final int id; final String url,host,path,method;
   final java.util.concurrent.atomic.AtomicBoolean finished=new java.util.concurrent.atomic.AtomicBoolean(false);
   volatile boolean cancelled=false;
+  volatile boolean started=false;
   volatile java.net.HttpURLConnection connection;
   volatile android.app.AlertDialog dialog;
   EclipseV44Job(int id,String url,String host,String path,String method){this.id=id;this.url=url;this.host=host;this.path=path;this.method=method;}
@@ -297,7 +309,7 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
    byte[] b=address.getAddress();
    if(address.isAnyLocalAddress()||address.isLoopbackAddress()||address.isSiteLocalAddress()||address.isLinkLocalAddress()||address.isMulticastAddress())throw new Exception("Non-public address blocked");
    if(b.length==4){int a=b[0]&255,c=b[1]&255,d=b[2]&255;
-    if(a==0||a>=224||a==100&&(c>=64&&c<=127)||a==192&&c==0&&d==0||a==198&&(c==18||c==19)||a==192&&c==0&&d==2||a==198&&c==51&&d==100||a==203&&c==0&&d==113)throw new Exception("Reserved IP blocked");
+    if(a==0||a>=224||a==100&&(c>=64&&c<=127)||a==192&&c==0||a==192&&c==88&&d==99||a==198&&(c==18||c==19)||a==198&&c==51&&d==100||a==203&&c==0&&d==113)throw new Exception("Reserved IP blocked");
    }else if(b.length==16){int a=b[0]&255,c=b[1]&255;
     if((a&254)==252||(a==0x20&&c==0x01&&b[2]==0x0d&&(b[3]&255)==0xb8))throw new Exception("Non-public IPv6 blocked");
    }else throw new Exception("Unsupported DNS address type");
@@ -346,6 +358,7 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
  }
  private void eclipseV44Perform(EclipseV44Job job){
   java.net.HttpURLConnection c=null;
+  boolean success=false;String resultMessage="Request not completed";
   try{
    if(job.cancelled)throw new java.io.InterruptedIOException("Cancelled before network");
    // DNS preflight refuses private and reserved ranges. No redirect or cookies are allowed.
@@ -387,9 +400,13 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
     .put("sample_sha256",hash).put("sample_truncated",truncated)
     .put("note","Metadata observation, not a verified security vulnerability. SHA-256 covers only the sampled bytes; HEAD has no body digest.");
    eclipseV44SaveEvidence(result); // Evidence must persist before reporting success.
-   eclipseV44Finish(job,true,result.toString());
-  }catch(Exception e){eclipseV44Finish(job,false,e.getMessage()==null?"HTTPS request failed":e.getMessage());}
-  finally{if(c!=null)c.disconnect();job.connection=null;}
+   success=true;resultMessage=result.toString();
+  }catch(Exception e){resultMessage=e.getMessage()==null?"HTTPS request failed":e.getMessage();}
+  finally{
+   if(c!=null)c.disconnect();job.connection=null;
+   // Only one worker at a time, including while cancellation is draining.
+   eclipseV44Finish(job,success&&!job.cancelled,job.cancelled?"Cancelled by owner (server may have received the request)":resultMessage);
+  }
  }
 
  public class Bridge{
@@ -618,6 +635,27 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
 
 
  // Eclipse V4.4: all calls come from untrusted WebView and must be validated natively.
+
+ @JavascriptInterface public void eclipseV441Ask(String prompt,int id){
+  if(id<=0||prompt==null||prompt.length()<10||prompt.length()>2500){reply("eclipseV441AiResult",id,false,"Invalid Eclipse prompt");return;}
+  if(!novaEngineLoaded){reply("eclipseV441AiResult",id,false,"Native GGUF engine unavailable");return;}
+  if(!generationBusy.compareAndSet(false,true)){reply("eclipseV441AiResult",id,false,"NOVA/Eclipse is already generating");return;}
+  eclipseV441AiActive.set(id);
+  new Thread(()->{
+   try{
+    java.io.File model=new java.io.File(new java.io.File(getFilesDir(),"models"),"nova-model.gguf");
+    if(!model.isFile())throw new Exception("Import a local GGUF model in Settings first");
+    String answer=nativeGenerate(model.getAbsolutePath(),prompt);
+    if(answer==null||answer.startsWith("NOVA_ENGINE_ERROR:"))throw new Exception(answer==null?"Empty native response":answer);
+    reply("eclipseV441AiResult",id,true,answer);
+   }catch(Exception e){reply("eclipseV441AiResult",id,false,e.getMessage()==null?"Local inference failed":e.getMessage());}
+   finally{eclipseV441AiActive.compareAndSet(id,0);generationBusy.set(false);}
+  },"eclipse-v441-local-ai").start();
+ }
+ @JavascriptInterface public void eclipseV441CancelAi(int id){
+  if(id>0&&eclipseV441AiActive.get()==id&&novaEngineLoaded)nativeCancelGeneration();
+ }
+
  @JavascriptInterface public void eclipseV44Request(String raw,String scope,String method,int id){
   final EclipseV44Job job;
   try{job=eclipseV44Validate(id,raw,scope,method);}catch(Exception e){reply("eclipseV44Result",id,false,e.getMessage());return;}
@@ -629,7 +667,11 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
     .setMessage("Method: "+job.method+"\nExact target: "+job.url+"\nUser-declared permitted host: "+job.host+"\n\nNo redirects, cookies, credentials, query parameters or automatic follow-up. Confirm that official rules permit this exact request. HTTPS network access is real.")
     .setNegativeButton("Reject",(d,which)->eclipseV44Finish(job,false,"Rejected by owner"))
     .setOnCancelListener(d->eclipseV44Finish(job,false,"Cancelled by owner"))
-    .setPositiveButton("Approve once",(d,which)->new Thread(()->eclipseV44Perform(job),"eclipse-v44-approved-request").start())
+    .setPositiveButton("Approve once",(d,which)->{
+     if(job.cancelled){eclipseV44Finish(job,false,"Cancelled before execution");return;}
+     job.started=true;
+     new Thread(()->eclipseV44Perform(job),"eclipse-v44-approved-request").start();
+    })
     .create();
    job.dialog=dialog;
    if(!job.cancelled)dialog.show();else eclipseV44Finish(job,false,"Cancelled");
@@ -640,7 +682,8 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
   job.cancelled=true;
   java.net.HttpURLConnection c=job.connection;if(c!=null)c.disconnect();
   android.app.AlertDialog d=job.dialog;if(d!=null)runOnUiThread(()->d.dismiss());
-  eclipseV44Finish(job,false,"Cancelled by owner (already-delivered requests cannot be undone)");
+  // A running worker retains the current-job lock until disconnection/cleanup.
+  if(!job.started)eclipseV44Finish(job,false,"Cancelled by owner before execution");
  }
  @JavascriptInterface public void eclipseV44History(int id){
   new Thread(()->{try{reply("eclipseV44HistoryResult",id,true,eclipseV44ReadHistory().toString());}
@@ -671,6 +714,6 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
  });}
  @JavascriptInterface public void open(String url){runOnUiThread(()->openExternal(url));}
  }
- @Override protected void onDestroy(){EclipseV44Job job=eclipseV44Current.get();if(job!=null){job.cancelled=true;java.net.HttpURLConnection c=job.connection;if(c!=null)c.disconnect();}super.onDestroy();}
+ @Override protected void onDestroy(){if(eclipseV441AiActive.get()!=0&&novaEngineLoaded)nativeCancelGeneration();EclipseV44Job job=eclipseV44Current.get();if(job!=null){job.cancelled=true;java.net.HttpURLConnection c=job.connection;if(c!=null)c.disconnect();}super.onDestroy();}
  @Override public void onBackPressed(){if(web.canGoBack())web.goBack();else super.onBackPressed();}
 }
