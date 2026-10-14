@@ -119,7 +119,130 @@ body{background:radial-gradient(ellipse 90% 35% at 50% -15%,#152e52 0%,transpare
 
 </style><style>/* NOVA_HQ_VISUAL_V1 */
 :root{--hq-border:#29323e;--hq-text:#e7edf4;--hq-muted:#9ba9b9;--hq-accent:#48a8b9}body{background:#10151c!important;color:var(--hq-text)!important;font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important}header.top{background:#151c25!important;border-bottom:1px solid var(--hq-border)!important;box-shadow:none!important}.brand{letter-spacing:.035em!important;font-weight:700!important}.item{box-shadow:none!important;border-color:var(--hq-border)!important}button.action{border-radius:10px!important;box-shadow:none!important}button.action.secondary{background:#202a35!important;color:#d5e2ed!important;border:1px solid #344252!important}.hq-head{display:flex;align-items:start;justify-content:space-between;gap:12px;margin:0 0 16px}.hq-head h1{font-size:26px;margin:3px 0 5px;letter-spacing:-.035em}.hq-eyebrow{font-size:10px;color:#8ca4b5;letter-spacing:.13em;font-weight:700}.hq-status{font-size:10px;color:#72c5a7;white-space:nowrap;padding:7px 9px;border:1px solid #294d46;border-radius:20px}.hq-channels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:16px}.hq-channels button{border:1px solid #35404c;background:#19212b;color:#acb8c6;border-radius:10px;padding:12px 4px;font-weight:600;font-size:12px;min-width:0}.hq-channels button.on{background:#24343f;border-color:#4d92a3;color:#e8f7fa}.hq-conversation{min-height:230px;max-height:54vh;overflow-y:auto;border:1px solid #2a3542;border-radius:14px;background:#131b24;padding:13px;margin:8px 0 12px}.hq-msg{display:flex;align-items:start;gap:9px;margin:12px 0}.hq-msg.mine{flex-direction:row-reverse}.hq-avatar{width:29px;height:29px;flex-shrink:0;border-radius:9px;background:#304657;color:#bce6ee;display:grid;place-items:center;font-size:12px;font-weight:700}.hq-msg.mine .hq-avatar{background:#364151}.hq-bubble{min-width:0;max-width:88%;border-radius:12px;padding:11px 12px;background:#1e2935;border:1px solid #2c3947}.hq-msg.mine .hq-bubble{background:#273541}.hq-author{font-size:11px;font-weight:700;color:#7cc5d1;margin-bottom:5px}.hq-body{font-size:14px;line-height:1.55;overflow-wrap:anywhere;white-space:pre-wrap}.hq-body p{margin:0 0 8px}.hq-composer{padding:12px;background:#17212b;border:1px solid #30404d;border-radius:13px}.hq-composer textarea{background:#111923!important;border:1px solid #344451!important;border-radius:10px!important;color:#e7edf4!important}.hq-composer label{font-size:12px;color:#b3c2d1}.hq-tools{margin-top:14px;border:1px solid #2b3541;border-radius:12px;padding:10px}.hq-tools summary{font-size:12px;color:#a5b3c2}.hq-help{font-size:12px;color:#a6b8c6;line-height:1.45}.hq-shortcuts{display:flex;gap:8px;margin-bottom:12px}.hq-shortcuts button{border:1px solid #344653;background:#1c2b36;color:#c5e6ec;padding:9px;border-radius:9px;font-size:12px}#hqModify select{width:100%;margin:8px 0 14px}@media(max-width:380px){.hq-channels button{font-size:11px;padding:11px 2px}.hq-head h1{font-size:23px}}
-</style></head><body><header class="top"><span class="star">✦</span><span class="brand">NOVA BOARD</span><button class="menu" onclick="toggleMenu()" aria-label="Toggle menu">☰</button></header><div class="layout"><aside id="nav"></aside><main id="content"></main></div><nav id="novaBottomNav" class="nova-bottom-nav" aria-label="Primary navigation"></nav>
+</style>
+
+
+
+
+
+
+<style id="nova-nightly-master-theme">
+/* NOVA_NIGHTLY_MASTER_V1 */
+:root {
+ color-scheme:dark;
+ --paper:#17191d;
+ --ink:#e5e8ec;
+ --copper:#929daa;
+ --line:#414852;
+ --neon:#aeb8c5;
+ --violet:#929daa;
+ --panel:#24282e;
+ --nova-cyan:#aeb8c5;
+ --nova-violet:#929daa;
+ --nova-mint:#9ca8b5;
+ --hq-border:#414852;
+ --hq-text:#e5e8ec;
+ --hq-muted:#aeb5bf;
+ --hq-accent:#929daa;
+}
+
+html,body {
+ background:#17191d!important;
+ color:#e5e8ec!important;
+ font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important;
+}
+
+header.top,.top,nav {
+ background:#202329!important;
+ border-color:#414852!important;
+ box-shadow:none!important;
+}
+
+#content,.hq-body {
+ color:#e5e8ec!important;
+}
+
+.card,.item,.panel,.hq-card,
+[class*="panel"],[class*="card"] {
+ background-color:#24282e!important;
+ border-color:#414852!important;
+ box-shadow:none!important;
+}
+
+.action,button.action {
+ background:#414852!important;
+ color:#f1f3f5!important;
+ border:1px solid #59626e!important;
+ box-shadow:none!important;
+ text-shadow:none!important;
+ font-weight:600!important;
+}
+
+.action.secondary,button.action.secondary {
+ background:#2d323a!important;
+ color:#dce1e7!important;
+ border:1px solid #515a66!important;
+ box-shadow:none!important;
+}
+
+.action:active,button.action:active {
+ background:#59626e!important;
+}
+
+input,textarea,select {
+ background:#20242a!important;
+ color:#e5e8ec!important;
+ border-color:#505864!important;
+ box-shadow:none!important;
+}
+
+input::placeholder,textarea::placeholder {
+ color:#939ca8!important;
+}
+
+h1,h2,h3,h4,strong {
+ color:#e5e8ec;
+}
+
+.note,small {
+ color:#aeb5bf;
+}
+
+a {
+ color:#c2cad4;
+}
+
+.eclipse-scout {
+ background:#24282e!important;
+ color:#e5e8ec!important;
+ border:1px solid #414852!important;
+ border-radius:14px;
+ padding:16px;
+ margin:14px 0;
+}
+
+.eclipse-scout-row {
+ background:#30353d!important;
+ border:1px solid #505864!important;
+ border-radius:10px;
+ padding:12px;
+ margin-top:10px;
+}
+
+.eclipse-scout-score {
+ float:right;
+ color:#e2e5ea;
+ font-weight:700;
+}
+
+.eclipse-scout .action.secondary {
+ background:#363c45!important;
+ color:#e5e8ec!important;
+ border:1px solid #59626e!important;
+}
+</style>
+
+</head><body><header class="top"><span class="star">✦</span><span class="brand">NOVA BOARD</span><button class="menu" onclick="toggleMenu()" aria-label="Toggle menu">☰</button></header><div class="layout"><aside id="nav"></aside><main id="content"></main></div><nav id="novaBottomNav" class="nova-bottom-nav" aria-label="Primary navigation"></nav>
 <script>
 window.addEventListener('error', function(e) {
   var el = document.getElementById('content');
@@ -224,7 +347,7 @@ if(t==='Jobs'){h=`<h1>Jobs · Find opportunities</h1><p><button class="action se
 if(t==='NOVA AI'){h=hqPanel()+(hqChannel==='meeting'?'<button class="action" onclick="hqDiscussOpen()">Discuss with team</button>':'')+`<div class="hq-conversation" aria-live="polite">${novaAiRender()}</div><div class="hq-composer"><label for="novaAiInput">Message ${esc(hqName())}</label><textarea id="novaAiInput" maxlength="5000" rows="3" placeholder="Ask a question or assign a task…"></textarea><button class="action" onclick="novaAiSend()" ${novaAiBusy&&!hqDiscussion.active?'disabled':''}>Send message →</button>${hqDiscussion.active?'<button class="action secondary" onclick="hqDiscussionStop()">Stop discussion</button>':novaAiBusy?'<button class="action secondary" onclick="novaAiCancel()">Cancel generation</button>':''}</div><details class="hq-tools"><summary>Tools and advanced actions</summary><button class="action secondary" onclick="novaNewConversation()">New conversation</button>${novaApprovalDesk()}<button class="action secondary" onclick="novaPaste('novaAiInput')">Paste</button><button class="action secondary" onclick="show('Security Lab')">Open Security Lab</button></details>`;}
 
 if(t==='Autopilot'){const st=apStats();h=`<h1>NOVA Autopilot</h1><p class="note">Local-first campaign assistant. Searches existing providers, scores jobs, drafts editable materials and queues applications for your review. No automatic submissions.</p><div class="item"><div class="name">${st.ready} awaiting review · ${st.approved} approved · ${st.submitted} confirmed submitted</div><div class="meta">${st.today}/${apSettings.dailyLimit} approved today · ${apQueue.length} total queued · ${st.interviews} interviews</div></div><h2>Campaign settings</h2><div class="autopilot-grid"><div><label>Minimum match score</label><input id="apMin" type="number" min="0" max="100" value="${apSettings.minimumScore}"></div><div><label>Daily approval limit</label><input id="apLimit" type="number" min="1" max="50" value="${apSettings.dailyLimit}"></div></div><label>Job search keyword</label><input id="apQuery" value="${attr(apSettings.keyword)}" placeholder="help desk"><label>Location</label><input id="apLocation" value="${attr(apSettings.location)}" placeholder="Columbus, OH"><label>Job source</label><select id="apProvider"><option value="remotive">Remotive (no key)</option><option value="adzuna">Adzuna (requires key)</option><option value="usajobs">USAJOBS (requires key)</option></select><p><button class="action" onclick="apDiscover()">Discover and score jobs</button><button class="action secondary" onclick="apSaveSettings()">Save settings</button></p><p class="note" id="apMessage">${esc(apMessage)}</p><h2>Resume Intelligence</h2><p class="note">Import PDF, DOCX or TXT using Android's document picker. Extraction is local. Check all details before using them in applications.</p><button class="action secondary" onclick="apImportResume()">Import resume</button><button class="action secondary" onclick="apClearResume()">Clear imported resume</button><p class="note" id="apResumeMessage">${esc(apResumeMessage)}</p><label>Imported resume (editable; not yet verified)</label><textarea id="apResumeText" rows="7" placeholder="Import or paste your resume here">${esc(apResumeText)}</textarea><button class="action secondary" onclick="apSaveResumeText()">Save imported text locally</button><button class="action secondary" onclick="apUseResumeForProfile()">Copy into verified profile for review</button><h2>Verified profile for drafts</h2><p class="note">Enter only skills and experience you can substantiate. No invented qualifications; drafts require review.</p><label>Full name</label><input id="apName" value="${attr(apProfile.name)}" placeholder="Your name"><label>Verified experience and skills</label><textarea id="apExperience" rows="4" placeholder="Describe real experience, skills, and achievements">${esc(apProfile.experience)}</textarea><label>Contact details for draft (optional)</label><input id="apContact" value="${attr(apProfile.contact)}" placeholder="Email / phone"><button class="action secondary" onclick="apSaveProfile()">Save draft profile locally</button><h2>Approval queue</h2>${apQueue.length?apQueue.map((a,i)=>`<div class="autopilot-row"><div class="name">${esc(a.title)}</div><div class="meta">${esc(a.company)} · ${esc(a.location)} · ${esc(a.provider)} · Match ${a.match}%</div><span class="autopilot-status">${esc(a.status)}</span><p class="note">${esc(a.reason)}</p><div class="autopilot-controls"><button class="action secondary" onclick="apDraft(${i})">Draft letter</button><button class="action secondary" onclick="apOpen(${i})">Open posting</button>${a.status==='Review'?`<button class="action" onclick="apApprove(${i})">Approve</button>`:''}${a.status==='Approved'?`<button class="action" onclick="apConfirmSubmitted(${i})">Confirm submitted</button>`:''}${a.status==='Submitted'?`<button class="action" onclick="apInterview(${i})">Mark interview</button>`:''}<button class="action secondary" onclick="apRemove(${i})">Remove</button></div>${apDraftIndex===i?`<div class="autopilot-draft">${esc(apLetter(a))}</div><button class="action secondary" onclick="apCopyDraft(${i})">Copy draft</button>`:''}</div>`).join(''):'<div class="empty">No queued applications yet. Discover jobs to begin.</div>'}`;}
-if(t==='BugHunter'){h=`<h1>Security · HackerOne</h1><button class="action" onclick="show('Security Lab')">Open Security Lab</button><button class="action secondary" onclick="show(&quot;Audit&quot;)">Authorized audits</button><p class="note">HackerOne program discovery requires configured credentials. Scope and reward eligibility must be checked on the official page.</p><button class="action" onclick="loadPrograms()">Load HackerOne programs</button><button class="action secondary" onclick="novaH1BatchStart()">Research next 5</button><p><input id="novaH1Filter" placeholder="Filter loaded programs" oninput="novaH1FilterChanged(this.value)" value="${attr(novaH1Filter)}"></p><div class="item"><strong>Saved investigations</strong>${novaH1SavedHtml()}</div><p class="note">${esc(providerError)}</p>${programs.map((b,i)=>({b,i})).filter(x=>x.b.name.toLowerCase().includes(novaH1Filter.toLowerCase())).map(({b,i})=>novaH1Card(b,i)).join('')}<label>Program name</label><input id="bn" placeholder="Program name"><label>Official program URL</label><input id="bu" placeholder="https://..."><button class="action" onclick="addBounty()">Save program</button>`+bounties.map((b,i)=>`<div class="item"><div class="name">${esc(b.name)}</div><div class="meta">${esc(b.url)}</div><button class="action" onclick="openUrl('${encodeURIComponent(b.url)}')">Official scope</button><button class="action secondary" onclick="removeBounty(${i})">Remove</button></div>`).join('')}
+if(t==='BugHunter'){h=`<h1>Security · HackerOne</h1>${novaH1AutoScoutHtml()}<button class="action" onclick="show('Security Lab')">Open Security Lab</button><button class="action secondary" onclick="show(&quot;Audit&quot;)">Authorized audits</button><p class="note">HackerOne program discovery requires configured credentials. Scope and reward eligibility must be checked on the official page.</p><button class="action" onclick="loadPrograms()">Load HackerOne programs</button><button class="action secondary" onclick="novaH1BatchStart()">Research next 5</button><p><input id="novaH1Filter" placeholder="Filter loaded programs" oninput="novaH1FilterChanged(this.value)" value="${attr(novaH1Filter)}"></p><div class="item"><strong>Saved investigations</strong>${novaH1SavedHtml()}</div><p class="note">${esc(providerError)}</p>${programs.map((b,i)=>({b,i})).filter(x=>x.b.name.toLowerCase().includes(novaH1Filter.toLowerCase())).map(({b,i})=>novaH1Card(b,i)).join('')}<label>Program name</label><input id="bn" placeholder="Program name"><label>Official program URL</label><input id="bu" placeholder="https://..."><button class="action" onclick="addBounty()">Save program</button>`+bounties.map((b,i)=>`<div class="item"><div class="name">${esc(b.name)}</div><div class="meta">${esc(b.url)}</div><button class="action" onclick="openUrl('${encodeURIComponent(b.url)}')">Official scope</button><button class="action secondary" onclick="removeBounty(${i})">Remove</button></div>`).join('')}
 if(t==='Applications'){h='<h1>Applications</h1><p class="note">Local tracking only. NOVA never claims an application was submitted automatically.</p>'+saved.map((j,i)=>`<div class="item"><div class="name">${esc(j.title)}</div><div class="meta">${esc(j.company)} · ${esc(j.pay)}<br>Status: ${esc(j.status)}</div><select onchange="changeStatus(${i},this.value)">${['Saved','Prepared','Needs review','Submitted (confirmed)','Interview','Rejected'].map(s=>`<option ${s===j.status?'selected':''}>${s}</option>`).join('')}</select><button class="action" onclick="openSaved(${i})">Open posting</button><button class="action secondary" onclick="removeJob(${i})">Remove</button></div>`).join('')}
 if(t==='Settings'){h=`<h1>Settings & API keys</h1><details><summary>Model setup & diagnostics</summary><button class="action" onclick="novaPickModel()">Import GGUF model</button>
 <button class="action" onclick="novaStartDownload()" ${novaDownloadBusy?'disabled':''}>Download Qwen3</button>
@@ -275,10 +398,132 @@ try{const o=JSON.parse(localStorage.getItem('nova.h1.details.v1')||'{}');if(o&&t
 function novaH1Handle(b){return b&&(/^[a-zA-Z0-9_-]{1,80}$/.test(b.handle||'')?b.handle:(String(b.url||'').match(/^https:\/\/hackerone\.com\/([a-zA-Z0-9_-]+)\/?$/)||[])[1])}
 function novaH1Score(d){if(!d||!Array.isArray(d.structured_scopes)||d.structured_scopes_has_more||d.scope_exclusions_has_more||d.structured_scopes_error||d.scope_exclusions_error)return null;const sc=d.structured_scopes.filter(x=>x&&x.attributes&&x.attributes.eligible_for_submission===true);if(!sc.length)return 0;const bounty=sc.filter(x=>x.attributes.eligible_for_bounty===true).length;const web=sc.filter(x=>/URL|DOMAIN/i.test(x.attributes.asset_type||'')).length;return Math.min(100,Math.round(20+Math.min(40,sc.length*3)+Math.min(25,bounty*4)+Math.min(15,web*3)))}
 function novaH1Summary(d){const a=d.program&&d.program.attributes||{};const scopes=d.structured_scopes||[];const exclusions=d.scope_exclusions||[];const limited=d.structured_scopes_has_more||d.scope_exclusions_has_more||d.structured_scopes_error||d.scope_exclusions_error;const policy=String(a.policy||a.policy_html||'').replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').slice(0,500);return `<div class="item"><strong>Official API snapshot</strong><p class="note">Fetched: ${esc(d.fetched_at||'Unknown')} · ${limited?'INCOMPLETE: verify on HackerOne':'Cached snapshot: recheck before testing'}</p><p class="note">${esc(policy||'Read official rules for full policy text.')}</p><p class="note">${scopes.length} scope entries${limited?' (partial/unavailable)':''} · ${exclusions.length} exclusions${d.scope_exclusions_error?' (unavailable)':''}</p>${scopes.slice(0,8).map(x=>{const v=x.attributes||{};return `<p class="note">${esc(v.asset_identifier||'Unknown asset')} · ${v.eligible_for_submission===true?'Submission eligible':'Not confirmed eligible'} · ${v.eligible_for_bounty===true?'Bounty eligible':'Bounty not confirmed'}${v.instruction?' · '+esc(String(v.instruction).slice(0,160)):''}</p>`}).join('')}${exclusions.slice(0,5).map(x=>`<p class="note">Excluded: ${esc((x.attributes||{}).category||'Category')} — ${esc((x.attributes||{}).details||'')}</p>`).join('')}<p class="note">Verify current rules on HackerOne before any test. Score is a heuristic, not payout probability.</p></div>`}
+
+/* ECLIPSE_AUTOSCOUT_V1 */
+let novaH1AutoScout=false;
+let novaH1AutoScoutProcessed=0;
+const novaH1AutoScoutLimit=20;
+
+function novaH1Candidate(d){
+ if(!d||!Array.isArray(d.structured_scopes)||
+    d.structured_scopes_has_more||d.scope_exclusions_has_more||
+    d.structured_scopes_error||d.scope_exclusions_error)
+  return {score:null,web:0,rewarded:0,reason:'Incomplete scope data'};
+
+ const web=d.structured_scopes.filter(x=>{
+  const a=x&&x.attributes||{};
+  return a.eligible_for_submission===true &&
+   /URL|DOMAIN/i.test(String(a.asset_type||''));
+ });
+
+ const rewarded=web.filter(x=>x.attributes.eligible_for_bounty===true);
+ const policy=String(
+  (d.program&&d.program.attributes||{}).policy||''
+ ).replace(/<[^>]*>/g,' ').toLowerCase();
+
+ const restricted=/no automated|automation prohibited|do not scan|no scanning|automated scanning prohibited/i.test(policy);
+
+ const score=web.length
+  ?Math.max(0,Math.min(100,
+    30+Math.min(30,web.length*5)+
+    Math.min(25,rewarded.length*5)-
+    (restricted?25:0)))
+  :0;
+
+ return {
+  score,web:web.length,rewarded:rewarded.length,
+  reason:restricted
+   ?'Automation restrictions detected; review official rules'
+   :'Automation permission unverified; review official rules'
+ };
+}
+
+function novaH1AutoScoutStart(){
+ if(novaH1AutoScout)return;
+
+ if(!programs.length){
+  providerError='Load HackerOne programs first.';
+  show('BugHunter');
+  return;
+ }
+
+ if(novaH1DetailPending.size||novaH1Batch.length){
+  providerError='Existing research is still running.';
+  show('BugHunter');
+  return;
+ }
+
+ novaH1Batch=programs.map((_,i)=>i)
+  .filter(i=>!novaH1DetailsCache[novaH1Handle(programs[i])])
+  .slice(0,novaH1AutoScoutLimit);
+
+ if(!novaH1Batch.length){
+  providerError='No uncached programs available. Review existing candidates.';
+  show('BugHunter');
+  return;
+ }
+
+ novaH1AutoScout=true;
+ novaH1AutoScoutProcessed=0;
+ novaH1BatchNext();
+}
+
+function novaH1AutoScoutHtml(){
+ const ranked=programs.map((b,i)=>({
+  b,i,r:novaH1Candidate(novaH1DetailsCache[novaH1Handle(b)])
+ })).filter(x=>x.r.score!==null&&x.r.web>0)
+   .sort((a,b)=>b.r.score-a.r.score)
+   .slice(0,5);
+
+ return `<section class="eclipse-scout">
+  <h2>Eclipse · AutoScout</h2>
+  <p class="note">Automatically research and rank suitable web bounty programs.
+  Rankings are research heuristics, not proof of authorization.</p>
+  <button class="action secondary"
+   onclick="novaH1AutoScoutStart()"
+   ${novaH1AutoScout?'disabled':''}>
+   ${novaH1AutoScout?'Researching…':'Auto-discover candidates'}
+  </button>
+  <p class="note">${novaH1AutoScout
+   ?'Research requests started: '+novaH1AutoScoutProcessed
+   :'Discovery only · active testing requires approval'}</p>
+  ${ranked.map((x,j)=>`
+   <div class="eclipse-scout-row">
+    <strong>${j+1}. ${esc(x.b.name)}</strong>
+    <span class="eclipse-scout-score">${x.r.score}/100</span>
+    <p class="note">${x.r.web} eligible web assets;
+     ${x.r.rewarded} bounty-eligible web assets</p>
+    <p class="note">${esc(x.r.reason)}</p>
+    <button class="action secondary"
+     onclick="novaH1Open(${x.i})">Official rules</button>
+    <button class="action secondary"
+     onclick="novaH1Launch(${x.i})">Prepare investigation</button>
+   </div>`).join('')||
+   '<p class="note">No ranked web candidates yet.</p>'}
+ </section>`;
+}
+
 let novaH1Batch=[];
 function novaH1BatchStart(){if(!programs.length){alert("Load HackerOne programs first");return;}novaH1Batch=programs.map((_,i)=>i).filter(i=>!novaH1DetailsCache[novaH1Handle(programs[i])]).slice(0,5);novaH1BatchNext()}
-function novaH1BatchNext(){if(!novaH1Batch.length)return;const i=novaH1Batch.shift();novaH1Research(i)}
-function novaH1Research(i){const b=programs[i];const handle=novaH1Handle(b);if(!handle||!window.Nova||typeof Nova.novaH1Details!=='function'){alert('Program details bridge unavailable; install updated APK');return;}const id=++novaH1DetailSeq;novaH1DetailPending.set(id,handle);providerError='Fetching official details for '+b.name+'…';show('BugHunter');Nova.novaH1Details(handle,id);setTimeout(()=>{if(novaH1DetailPending.has(id)){novaH1DetailPending.delete(id);providerError='Details request timed out; try again';show('BugHunter')}},45000)}
+
+function novaH1BatchNext(){
+ if(!novaH1Batch.length){
+  if(novaH1AutoScout){
+   novaH1AutoScout=false;
+   providerError='AutoScout finished '+
+    novaH1AutoScoutProcessed+
+    ' research requests. Review candidate rankings.';
+   show('BugHunter');
+  }
+  return;
+ }
+
+ const i=novaH1Batch.shift();
+ if(novaH1AutoScout)novaH1AutoScoutProcessed++;
+ novaH1Research(i);
+}
+
+function novaH1Research(i){const b=programs[i];const handle=novaH1Handle(b);if(!handle||!window.Nova||typeof Nova.novaH1Details!=='function'){alert('Program details bridge unavailable; install updated APK');return;}const id=++novaH1DetailSeq;novaH1DetailPending.set(id,handle);providerError='Fetching official details for '+b.name+'…';show('BugHunter');Nova.novaH1Details(handle,id);setTimeout(()=>{if(novaH1DetailPending.has(id)){novaH1DetailPending.delete(id);providerError='Details request timed out; continuing research';show('BugHunter');if(novaH1Batch.length||novaH1AutoScout)setTimeout(novaH1BatchNext,1500)}},45000)}
 function novaH1DetailsResult(id,ok,payload){const handle=novaH1DetailPending.get(id);if(!handle)return;novaH1DetailPending.delete(id);if(novaManagerResearch&&novaManagerResearch.handle===handle){setTimeout(()=>{if(novaManagerResearch&&novaManagerResearch.handle===handle)novaManagerProducePlan()},0);}if(novaManagerResearch&&novaManagerResearch.handle===handle){novaManagerResearch.active=false;novaManagerResearch.status=ok?"Research retrieved; preparing plan":"Official research unavailable; preparing limited plan";}if(!ok){providerError='Program details for '+handle+': '+String(payload||'Request failed').replace(/(?:;?\s*scope not verified\.?)+$/i,'')+'; scope not verified.';show('BugHunter');if(novaH1Batch.length)setTimeout(novaH1BatchNext,1500);return;}try{const d=JSON.parse(payload);if(d.handle!==handle)throw Error('Program handle mismatch');if(!d.program||typeof d.program!=='object'){const detail=String(d.program_error||d.error||'Official program metadata missing');const scopeStatus=Array.isArray(d.structured_scopes)?'Scope API: '+d.structured_scopes.length+' entries'+(d.structured_scopes_has_more?' (partial)':''):'Scope API: '+String(d.structured_scopes_error||'unavailable');const exclusionsStatus=Array.isArray(d.scope_exclusions)?'Exclusions API: '+d.scope_exclusions.length+' entries'+(d.scope_exclusions_has_more?' (partial)':''):'Exclusions API: '+String(d.scope_exclusions_error||'unavailable');providerError='Program '+handle+': '+detail+' | '+scopeStatus+' | '+exclusionsStatus+'. Scope NOT verified; open Official rules.';show('BugHunter');if(novaH1Batch.length)setTimeout(novaH1BatchNext,1500);return;}d.fetched_at=new Date().toISOString();novaH1DetailsCache[handle]=d;try{localStorage.setItem('nova.h1.details.v1',JSON.stringify(novaH1DetailsCache))}catch(e){}providerError='Program details updated. Review scope and rules before launching.';show('BugHunter');if(novaH1Batch.length)setTimeout(novaH1BatchNext,1500)}catch(e){providerError='Program research unavailable for '+handle+': '+e.message+' — scope not verified. Open Official rules or retry.';show('BugHunter');if(novaH1Batch.length)setTimeout(novaH1BatchNext,1500)}}
 
 /* NOVA_MANAGER_RESEARCH_V1: automatic research, human-approved actions */
