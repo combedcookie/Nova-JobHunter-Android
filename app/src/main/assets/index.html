@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>NOVA JobHunter</title><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>NOVA Board · Obsidian</title><style>
 :root{--paper:#f4eddf;--ink:#211d19;--copper:#865136;--line:#d5c8b7}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Georgia,serif}.top{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:17px;position:sticky;top:0;background:var(--paper);z-index:3}.brand{font-size:clamp(23px,6vw,35px);font-weight:bold;letter-spacing:1px}.star{font-size:28px;color:var(--copper)}.menu{font:28px sans-serif;color:var(--copper);background:none;border:0;padding:4px 9px}.layout{display:block}aside{display:none;background:#eee1cf;border-bottom:1px solid var(--line);padding:8px}aside.open{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}aside button{border:1px solid var(--line);background:var(--paper);padding:13px 5px;color:var(--ink);font:17px Georgia}aside button.active{background:#e0c6ab;border-color:var(--copper)}main{padding:20px 17px;max-width:850px;margin:auto}h1{font-size:30px;margin:0 0 15px}h2{font-size:22px}.item{border-top:1px solid var(--line);padding:17px 0}.meta{font:13px/1.6 system-ui;color:#665e56}.name{font-size:19px;font-weight:bold}.pill{display:inline-block;font:11px system-ui;border:1px solid var(--line);padding:4px 8px;border-radius:30px;margin:5px 4px 4px 0}.action{border:1px solid var(--copper);border-radius:4px;background:var(--copper);color:white;padding:11px;font:14px system-ui;margin:6px 6px 0 0}.action.secondary{background:transparent;color:var(--copper)}input,select,textarea{width:100%;border:1px solid var(--line);border-radius:3px;padding:12px;background:#fffaf1;font:15px system-ui;margin:5px 0 12px}label{font:13px system-ui}.note{font:14px/1.6 system-ui;color:#625a52}.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px}.filters>div{min-width:0}.empty{padding:30px 10px;text-align:center;border:1px dashed var(--line)}
 
 .autopilot-row{border-top:1px solid var(--line);padding:14px 0}.autopilot-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.autopilot-grid>div{min-width:0}.autopilot-status{display:inline-block;font:12px system-ui;color:var(--copper);border:1px solid var(--line);border-radius:15px;padding:3px 8px}.autopilot-draft{white-space:pre-wrap;font:13px/1.6 system-ui;background:#fffaf1;padding:12px;border:1px solid var(--line);margin:10px 0}.autopilot-controls{display:flex;flex-wrap:wrap;gap:5px}
@@ -126,167 +126,39 @@ body{background:radial-gradient(ellipse 90% 35% at 50% -15%,#152e52 0%,transpare
 
 
 
-<style id="nova-nightly-master-theme">
-/* NOVA_NIGHTLY_MASTER_V1 */
-:root {
- color-scheme:dark;
- --paper:#17191d;
- --ink:#e5e8ec;
- --copper:#929daa;
- --line:#414852;
- --neon:#aeb8c5;
- --violet:#929daa;
- --panel:#24282e;
- --nova-cyan:#aeb8c5;
- --nova-violet:#929daa;
- --nova-mint:#9ca8b5;
- --hq-border:#414852;
- --hq-text:#e5e8ec;
- --hq-muted:#aeb5bf;
- --hq-accent:#929daa;
-}
-
-html,body {
- background:#17191d!important;
- color:#e5e8ec!important;
- font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important;
-}
-
-header.top,.top,nav {
- background:#202329!important;
- border-color:#414852!important;
- box-shadow:none!important;
-}
-
-#content,.hq-body {
- color:#e5e8ec!important;
-}
-
-.card,.item,.panel,.hq-card,
-[class*="panel"],[class*="card"] {
- background-color:#24282e!important;
- border-color:#414852!important;
- box-shadow:none!important;
-}
-
-.action,button.action {
- background:#414852!important;
- color:#f1f3f5!important;
- border:1px solid #59626e!important;
- box-shadow:none!important;
- text-shadow:none!important;
- font-weight:600!important;
-}
-
-.action.secondary,button.action.secondary {
- background:#2d323a!important;
- color:#dce1e7!important;
- border:1px solid #515a66!important;
- box-shadow:none!important;
-}
-
-.action:active,button.action:active {
- background:#59626e!important;
-}
-
-input,textarea,select {
- background:#20242a!important;
- color:#e5e8ec!important;
- border-color:#505864!important;
- box-shadow:none!important;
-}
-
-input::placeholder,textarea::placeholder {
- color:#939ca8!important;
-}
-
-h1,h2,h3,h4,strong {
- color:#e5e8ec;
-}
-
-.note,small {
- color:#aeb5bf;
-}
-
-a {
- color:#c2cad4;
-}
-
-.eclipse-scout {
- background:#24282e!important;
- color:#e5e8ec!important;
- border:1px solid #414852!important;
- border-radius:14px;
- padding:16px;
- margin:14px 0;
-}
-
-.eclipse-scout-row {
- background:#30353d!important;
- border:1px solid #505864!important;
- border-radius:10px;
- padding:12px;
- margin-top:10px;
-}
-
-.eclipse-scout-score {
- float:right;
- color:#e2e5ea;
- font-weight:700;
-}
-
-.eclipse-scout .action.secondary {
- background:#363c45!important;
- color:#e5e8ec!important;
- border:1px solid #59626e!important;
-}
-</style>
 
 
-<!-- NOVA_OBSIDIAN_THEME_V1 -->
-<style id="nova-obsidian-v1">
-:root{
- color-scheme:dark;
- --paper:#060c15;--ink:#f1f7ff;--copper:#319fff;--line:#315a78;
- --panel:#091726;--hq-border:#315a78;--hq-text:#f1f7ff;
- --hq-muted:#9fb8d0;--hq-accent:#42b6ff;
-}
-html,body{min-height:100%;color:#f1f7ff!important;font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important}
-body{
- background:
- radial-gradient(circle at 88% 8%,rgba(65,159,255,.25) 0 3%,rgba(6,22,45,.85) 9%,transparent 24%),
- radial-gradient(ellipse 85% 34% at 85% 4%,rgba(27,87,151,.58),transparent 75%),
- radial-gradient(ellipse 90% 38% at 12% 43%,rgba(18,53,86,.65),transparent 80%),
- linear-gradient(165deg,#02050b,#071421 46%,#02060c)!important;
- background-attachment:fixed!important;
-}
-body:before{content:"";position:fixed;z-index:-1;pointer-events:none;right:-24vw;top:5vh;
- width:82vw;height:82vw;border-radius:50%;
- background:radial-gradient(circle at 27% 28%,rgba(125,192,242,.55),rgba(25,68,115,.65) 21%,#081b32 47%,#01040a 69%);
- box-shadow:-18px -12px 75px rgba(61,141,224,.25),inset 16px 12px 30px rgba(150,209,255,.13);
- opacity:.78}
-header.top,.top{background:rgba(3,10,20,.79)!important;border-bottom:1px solid #24445f!important;box-shadow:none!important;backdrop-filter:blur(12px)}
-.brand{background:none!important;-webkit-text-fill-color:#eef7ff!important;color:#eef7ff!important;letter-spacing:.035em!important}
-.star,.menu{color:#4db8ff!important}
-#content .item,#content .card,.nova-hero,.nova-category,.hq-conversation,.hq-composer,.eclipse-scout{
- background:rgba(3,14,27,.78)!important;border:1px solid #285476!important;
- border-radius:12px!important;box-shadow:0 7px 24px #0006!important;backdrop-filter:blur(7px)}
-#content .item:focus-within{border-color:#42b7ff!important}
-#content h1,#content h2,#content h3{color:#f4f9ff!important}
-.note,.meta,.hq-help{color:#b0c7d9!important}
-input,select,textarea{background:rgba(3,13,26,.92)!important;color:#f4f9ff!important;border:1px solid #315a7a!important}
-#content button.action:not(.secondary){background:linear-gradient(180deg,#1978cb,#07519e)!important;border:1px solid #3caeff!important;color:white!important;box-shadow:none!important}
-#content button.action.secondary{background:#0b2034!important;border:1px solid #315777!important;color:#d9edff!important}
-.nova-bottom-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important;background:rgba(2,10,21,.96)!important;border-top:1px solid #2b5979!important}
-.nova-bottom-nav button{color:#c1d7e9!important}
-.nova-bottom-nav button.active{background:#092747!important;border-color:#1f6ca7!important;color:#60c6ff!important;animation:none!important;box-shadow:none!important}
-#nav.open{background:#071522!important}
-@media(max-width:899px){body{padding-top:max(24px,env(safe-area-inset-top,0px))!important}
-main{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))!important}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important}}
-</style>
 
-</head><body><header class="top"><span class="star">✦</span><span class="brand">NOVA BOARD</span><button class="menu" onclick="toggleMenu()" aria-label="Toggle menu">☰</button></header><div class="layout"><aside id="nav"></aside><main id="content"></main></div><nav id="novaBottomNav" class="nova-bottom-nav" aria-label="Primary navigation"></nav>
+
+
+<style id="OBSIDIAN_V2_REBUILD">
+:root{color-scheme:dark;--paper:#040b15;--ink:#eef7ff;--copper:#329dff;--line:#285476;--panel:#071827}
+html,body{background:#030a15!important;color:#eef7ff!important;font-family:system-ui,-apple-system,Segoe UI,sans-serif!important}
+body{background:linear-gradient(180deg,rgba(2,7,15,.1),rgba(2,7,15,.78) 43%,#020814 90%),url('obsidian_space.svg') center top/100% auto no-repeat fixed!important}
+body:before{display:none!important}
+header.top,.top{background:rgba(2,10,21,.75)!important;border-bottom:1px solid #255173!important;box-shadow:none!important;backdrop-filter:blur(12px)}
+.brand{background:none!important;color:#f1f8ff!important;-webkit-text-fill-color:#f1f8ff!important;letter-spacing:.11em!important}
+main{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))!important}
+#content .item,#content .card,.nova-hero,.hq-conversation,.hq-composer,.eclipse-scout{background:rgba(4,16,31,.88)!important;border:1px solid #285476!important;border-radius:12px!important;box-shadow:0 10px 25px #0005!important}
+input,select,textarea{background:#071827!important;color:#eef7ff!important;border:1px solid #315a78!important}
+#content .action:not(.secondary){background:linear-gradient(#197dcb,#07509b)!important;color:#fff!important;border:1px solid #3da9ff!important}
+#content .action.secondary{background:#10263d!important;color:#d5ecff!important;border:1px solid #315a78!important}
+.nova-bottom-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important;background:rgba(2,10,21,.96)!important;border-top:1px solid #295679!important}
+.nova-bottom-nav button.active{background:#0b2946!important;color:#69caff!important;border-color:#296f9d!important;animation:none!important;box-shadow:none!important}
+.obs-hero{min-height:240px;display:flex;flex-direction:column;justify-content:flex-end;padding:20px 14px;margin:-12px -5px 18px;border-radius:12px;background:linear-gradient(transparent,rgba(3,12,25,.88))}
+.obs-hero h1{font-size:32px!important;letter-spacing:.09em!important;margin:8px 0!important}.obs-hero p{color:#c0d8ec;font-size:13px}
+.obs-kicker,.obs-label{font-size:12px!important;font-weight:750;letter-spacing:.09em;color:#62c9ff!important}
+.obs-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:13px}
+.obs-stats>div{background:rgba(3,14,28,.86);border:1px solid #295777;border-radius:10px;padding:13px 4px;text-align:center}
+.obs-stats b{display:block;font-size:24px}.obs-stats small{display:block;font-size:10px;color:#b8d3e7}
+.obs-label{margin:20px 0 11px}
+.obs-agent{display:block;width:100%;text-align:left;padding:19px 16px;margin:9px 0;background:rgba(2,13,27,.9);border:1px solid #2a5677;border-radius:11px;color:#eef7ff}
+.obs-agent strong{display:block;font-size:17px}.obs-agent small{display:block;color:#b6d0e5;margin-top:7px}
+.obs-agent.eclipse{border-left:3px solid #19d4a2}.obs-agent.hermes{border-left:3px solid #ffad40}
+.obs-panel{padding:18px;line-height:2;background:rgba(3,14,28,.88);border:1px solid #285476;border-radius:11px;color:#c6dcee}
+.obs-links{display:grid;gap:9px}.obs-links button{padding:19px 15px;text-align:left;border:1px solid #285476;border-radius:11px;background:rgba(3,14,28,.9);color:#eaf5ff;font-size:16px}
+@media(min-width:900px){body{background-size:cover!important}}
+</style></head><body><header class="top"><span class="star">✦</span><span class="brand">NOVA BOARD</span><button class="menu" onclick="toggleMenu()" aria-label="Toggle menu">☰</button></header><div class="layout"><aside id="nav"></aside><main id="content"></main></div><nav id="novaBottomNav" class="nova-bottom-nav" aria-label="Primary navigation"></nav>
 <script>
 window.addEventListener('error', function(e) {
   var el = document.getElementById('content');
@@ -320,12 +192,12 @@ function novaEmpReject(){if(typeof window.novaEmpReject==="function")return wind
 <script>
 const tabs=['Overview','Finance','Hermes','Jobs','Autopilot','NOVA AI','BugHunter','Applications','Learn','Audit','Agent Tasks','Settings'];let tab='Overview',jobs=[],query='',searched=false,loading=false,error='',req=0;let saved=load('nova.saved'),bounties=load('nova.bounties');let provider='remotive',jobLocation='Columbus, OH',configReq=0,providerReq=0,providerPending='',programs=[],providerError='';let auditReq=0,auditHistory=load('nova.auditHistory');let filters={work:'any',type:'any',salary:'0',level:'any'};
 function load(k){try{const v=JSON.parse(localStorage.getItem(k)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}function persist(){localStorage.setItem('nova.saved',JSON.stringify(saved));localStorage.setItem('nova.bounties',JSON.stringify(bounties))}function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function attr(s){return esc(s)}/* NOVA_WORKSPACE_NAV_V2 */
-function novaNavGroup(t){if(t==='Overview')return 'Home';if(['Hermes','Jobs','Autopilot','Applications'].includes(t))return 'Jobs';if(['NOVA AI','Agent Tasks','NOVA Copilot'].includes(t))return 'NOVA AI';if(['BugHunter','Audit','Security Lab'].includes(t))return 'Security';return 'More'}
-const novaPrimary=[['Board','Overview','⌂'],['NOVA','NOVA AI','✦'],['Agents','Hermes','▦']];
+function novaNavGroup(t){if(t==='Overview')return 'Board';if(['NOVA AI','Agent Tasks','NOVA Copilot'].includes(t))return 'NOVA';return 'Agents'}
+const novaPrimary=[['Board','Overview','⌂'],['NOVA','NOVA AI','✦'],['Agents','Agents','▦']];
 function novaGoPrimary(label){if(label==='More'){toggleMenu();return;}const n=document.getElementById('nav');if(n)n.classList.remove('open');const entry=novaPrimary.find(x=>x[0]===label);if(entry)show(entry[1]);}
 function toggleMenu(){const n=document.getElementById('nav');n.classList.toggle('open');n.setAttribute('aria-hidden',String(!n.classList.contains('open')))}
 function nav(){
- const groups=[['Home',['Overview']],['Career',['Hermes','Jobs','Autopilot','Applications']],['Assistant',['NOVA AI','Agent Tasks']],['Security',['Security Lab','BugHunter','Audit']],['Resources',['Finance','Learn','Settings']]];
+ const groups=[['Board',['Overview']],['Agents',['Agents','Eclipse','Hermes','Hermes Scout','Jobs','Autopilot','Applications']],['Assistant',['NOVA AI','Agent Tasks']],['Security',['Security Lab','BugHunter','Audit']],['Resources',['Finance','Learn','Settings']]];
  document.getElementById('nav').innerHTML=groups.map(([name,pages])=>`<details class="nova-category" ${pages.includes(tab)?'open':''}><summary>${esc(name)} <span>⌄</span></summary><div class="nova-category-links">${pages.map(t=>`<button class="${tab===t?'active':''}" data-page="${esc(t)}">${esc(t)}</button>`).join('')}</div></details>`).join('');
  document.querySelectorAll('#nav [data-page]').forEach(b=>b.addEventListener('click',()=>show(b.dataset.page)));
  const bar=document.getElementById('novaBottomNav');if(bar)bar.innerHTML=novaPrimary.map(([name,dest,icon])=>'<button type="button" class="'+(novaNavGroup(tab)===name?'active':'')+'" onclick="novaGoPrimary(&quot;'+name+'&quot;)" aria-label="'+name+'"><span aria-hidden="true">'+icon+'</span><small>'+name+'</small></button>').join('');
@@ -385,8 +257,11 @@ function novaFinanceRender(){const entries=novaLedgerRead();const sum=(type)=>en
 function novaFinanceAdd(){const t=document.getElementById('nfType').value, raw=document.getElementById('nfAmount').value,note=document.getElementById('nfNote').value.trim();const n=Number(raw);if(!['income','expense','potential'].includes(t)||!raw||!Number.isFinite(n)||n<=0||n>100000000||!note){alert('Enter a valid amount and description');return}const entries=novaLedgerRead();entries.push({id:String(Date.now())+'-'+Math.floor(Math.random()*1000000),type:t,cents:Math.round(n*100),note:note.slice(0,160),date:new Date().toISOString().slice(0,10)});try{localStorage.setItem(novaLedgerKey,JSON.stringify(entries.slice(-500)));show('Finance')}catch(e){alert('Could not save locally: '+e.message)}}
 function novaFinanceRemove(id){if(!confirm('Delete this ledger entry?'))return;try{localStorage.setItem(novaLedgerKey,JSON.stringify(novaLedgerRead().filter(e=>e.id!==id)));show('Finance')}catch(e){alert('Could not update ledger')}}
 
-function show(t){if(t==='NOVA Copilot')t='NOVA AI';tab=t;const menu=document.getElementById('nav');if(menu)menu.classList.remove('open');nav();let h='';if(t==='Agent Tasks')h=novaAgentRender();if(t==='NOVA Copilot')h=novaCopilotRender();if(t==='Security Lab')h=novaLabRender();if(t==='Finance')h=novaFinanceRender();if(t==='Overview'){h=`<h1>Your workspace</h1><p class="note">Choose what you want to work on. Everything else stays in its category.</p><div class="nova-hub"><button onclick="show('NOVA AI')">✦ Launch NOVA<small>Guided tasks and approvals</small></button><button onclick="show('Jobs')">▣ Find Jobs<small>Search and track opportunities</small></button><button onclick="novaEmpOpen()">☾ Eclipse<small>Company · Employee #001</small></button><button onclick="show('Security Lab')">⬡ Security Lab<small>Approved experiments</small></button><button onclick="show('Applications')">✓ Applications<small>Saved applications</small></button></div><details><summary>Activity summary</summary><button class="action" onclick="show('NOVA AI')">Launch NOVA Copilot</button><p class="note">Your private opportunity board. Search live remote openings, track applications, and organize bounty research.</p><div class="item"><div class="name">${jobs.length} fetched jobs</div><div class="meta">Live search results from Remotive; search required</div></div><div class="item"><div class="name">${saved.length} tracked applications</div><div class="meta">Stored locally on this phone</div></div><div class="item"><div class="name">${bounties.length} bounty notes</div><div class="meta">Manual research; verify authorization</div></div><button class="action" onclick="show('Jobs')">Search jobs</button></details>`}
-if(t==='Hermes'){h=hermesRender()}
+function show(t){if(t==='NOVA Copilot')t='NOVA AI';tab=t;const menu=document.getElementById('nav');if(menu)menu.classList.remove('open');nav();let h='';if(t==='Agent Tasks')h=novaAgentRender();if(t==='NOVA Copilot')h=novaCopilotRender();if(t==='Security Lab')h=novaLabRender();if(t==='Finance')h=novaFinanceRender();if(t==='Overview'){h=`<section class="obs-hero"><div class="obs-kicker">COMPANY COMMAND CENTER</div><h1>NOVA BOARD</h1><p>Private multi-agent workspace</p><div class="obs-stats"><div><b>2</b><small>AGENTS</small></div><div><b>${jobs.length}</b><small>JOBS LOADED</small></div><div><b>${saved.length}</b><small>TRACKED</small></div></div></section><h2 class="obs-label">AGENTS</h2><button class="obs-agent eclipse" onclick="show('Eclipse')"><strong>⬡ &nbsp; Eclipse</strong><small>Security Operations · Offline research</small></button><button class="obs-agent hermes" onclick="show('Hermes')"><strong>▣ &nbsp; Hermes</strong><small>Career Intelligence · Jobs and applications</small></button><h2 class="obs-label">RECENT ACTIVITY</h2><div class="obs-panel">Eclipse · Offline challenge previously passed 6/6<br>Hermes · ${jobs.length} jobs loaded in this session</div>`}
+if(t==='Agents'){h=`<section class="obs-hero"><div class="obs-kicker">SPECIALIZED AI SYSTEMS</div><h1>AGENTS</h1><p>Choose an agent workspace</p></section><button class="obs-agent eclipse" onclick="show('Eclipse')"><strong>⬡ &nbsp; Eclipse</strong><small>Security Operations · Research · Testing</small></button><button class="obs-agent hermes" onclick="show('Hermes')"><strong>▣ &nbsp; Hermes</strong><small>Career Intelligence · Jobs · Applications</small></button><div class="obs-panel">More agents coming</div>`}
+if(t==='Eclipse'){h=`<section class="obs-hero"><div class="obs-kicker">SECURITY OPERATIONS</div><h1>⬡ ECLIPSE</h1><p>Offline challenge: 6/6 previously passed</p></section><div class="obs-links"><button onclick="show('Security Lab')">Security Lab</button><button onclick="show('BugHunter')">Findings & Research</button><button onclick="show('Audit')">Approvals & Audit</button><button onclick="show('Agent Tasks')">Agent Tasks</button></div>`}
+if(t==='Hermes'){h=`<section class="obs-hero"><div class="obs-kicker">CAREER INTELLIGENCE</div><h1>▣ HERMES</h1><div class="obs-stats"><div><b>${saved.length}</b><small>TRACKED</small></div><div><b>${jobs.length}</b><small>LOADED</small></div><div><b>—</b><small>INTERVIEWS</small></div></div></section><div class="obs-links"><button onclick="show('Jobs')">Job Search</button><button onclick="show('Applications')">Applications</button><button onclick="show('Autopilot')">Autopilot</button><button onclick="show('Hermes Scout')">Career Scout</button></div>`}
+if(t==='Hermes Scout'){h=hermesRender()}
 if(t==='Jobs'){h=`<h1>Jobs · Find opportunities</h1><p><button class="action secondary" onclick="show(&quot;Hermes&quot;)">Hermes career agent</button></p><p><button class="action secondary" onclick="show(&quot;Autopilot&quot;)">Autopilot</button><button class="action secondary" onclick="show(&quot;Applications&quot;)">Applications</button></p><p class="note">Search Remotive, Adzuna, or USAJOBS. Coverage and salary data vary by provider.</p><label>Source</label><select id="provider" onchange="provider=this.value;show('Jobs')"><option value="remotive">Remotive (no key)</option><option value="adzuna">Adzuna (local)</option><option value="usajobs">USAJOBS (federal)</option></select><label>Location (Adzuna / USAJOBS)</label><input id="location" value="${attr(jobLocation)}" placeholder="Columbus, OH"><label>Job title or keyword</label><input id="q" value="${attr(query)}" placeholder="Help desk, junior IT, Python..."><button class="action" onclick="searchJobs()">${loading?'Searching…':'Search live jobs'}</button><div class="filters"><div><label>Work arrangement</label><select id="work" onchange="setFilter('work',this.value)"><option value="any">Any available</option><option value="remote">Remote</option><option value="onsite">On-site (not in this source)</option></select></div><div><label>Employment</label><select id="type" onchange="setFilter('type',this.value)"><option value="any">Any</option><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="internship">Internship</option></select></div><div><label>Minimum listed annual pay</label><select id="salary" onchange="setFilter('salary',this.value)"><option value="0">Any / undisclosed</option><option value="40000">$40,000+</option><option value="60000">$60,000+</option><option value="80000">$80,000+</option><option value="100000">$100,000+</option></select></div><div><label>Experience</label><select id="level" onchange="setFilter('level',this.value)"><option value="any">Any</option><option value="entry">Entry-level titles</option></select></div></div><p class="note" id="status">${loading?'Fetching live postings…':error?esc(error):searched?`${filtered().length} matches from ${jobs.length} fetched postings`:'Run a search to begin.'}</p><div id="results">${filtered().map((j)=>jobCard(j,jobs.indexOf(j))).join('')|| (searched&&!loading?'<div class="empty">No matches. Try broader keywords or filters.</div>':'')}</div>`;}
 
 if(t==='NOVA AI'){h=hqPanel()+(hqChannel==='meeting'?'<button class="action" onclick="hqDiscussOpen()">Discuss with team</button>':'')+`<div class="hq-conversation" aria-live="polite">${novaAiRender()}</div><div class="hq-composer"><label for="novaAiInput">Message ${esc(hqName())}</label><textarea id="novaAiInput" maxlength="5000" rows="3" placeholder="Ask a question or assign a task…"></textarea><button class="action" onclick="novaAiSend()" ${novaAiBusy&&!hqDiscussion.active?'disabled':''}>Send message →</button>${hqDiscussion.active?'<button class="action secondary" onclick="hqDiscussionStop()">Stop discussion</button>':novaAiBusy?'<button class="action secondary" onclick="novaAiCancel()">Cancel generation</button>':''}</div><details class="hq-tools"><summary>Tools and advanced actions</summary><button class="action secondary" onclick="novaNewConversation()">New conversation</button>${novaApprovalDesk()}<button class="action secondary" onclick="novaPaste('novaAiInput')">Paste</button><button class="action secondary" onclick="show('Security Lab')">Open Security Lab</button></details>`;}
@@ -417,7 +292,7 @@ if(t==='Settings'){h=`<h1>Settings & API keys</h1><details><summary>Model setup 
 if(t==='Audit'){h=`<h1>Security · Authorized Audit</h1><button class="action secondary" onclick="show(&quot;BugHunter&quot;)">HackerOne programs</button><p class="note">Low-impact, single-request security-header review. Only test websites you own or have explicit permission to assess. Does not exploit, crawl, enumerate paths, or confirm vulnerabilities.</p><label>HTTPS website</label><input id="auditTarget" placeholder="https://your-authorized-domain.example"><label><input id="auditConsent" type="checkbox" style="width:auto"> I own this website or have explicit authorization for this check</label><p><button class="action" onclick="runAudit()">Propose passive audit</button></p><div class="item"><strong>Approval queue</strong><p class="note">Each HTTPS header check needs separate approval. No automatic follow-up actions.</p>${novaBountyApprovalHtml()}</div><div class="note" id="auditResult">No audit run yet.</div><h2>Scan history</h2>${auditHistory.map(a=>`<div class="item"><div class="name">${esc(a.host)}</div><div class="meta">${esc(new Date(a.checked_at).toLocaleString())} · HTTP ${esc(a.http_status)}</div>${a.observations.map(x=>`<p class="note">• ${esc(x)}</p>`).join('')}</div>`).join('')}`;}
 if(t==='Learn'){h='<h1>Learn</h1><div class="item"><h2>IT troubleshooting</h2><p class="note">Networking, DNS, VPN fundamentals, and help-desk ticket documentation.</p></div><div class="item"><h2>Web security</h2><p class="note">Practice in authorized labs and verify every bug bounty program’s scope.</p></div><div class="item"><h2>About match scores</h2><p class="note">Simple keyword estimates based on technical skills. Not recruiter ratings or guaranteed eligibility.</p></div>'}
 if(t==='BugHunter'&&novaH1DraftIndex>=0&&novaH1Saved[novaH1DraftIndex]){const b=novaH1Saved[novaH1DraftIndex];h+=`<div class="item" id="novaH1Handoff"><h2>Send to NOVA · Review</h2><strong>${esc(b.name)}</strong><p class="note">Official rules: ${esc(b.url)}. Cached scope may be incomplete; NOVA must not infer authorization.</p><label>Your comments, observations and questions</label><textarea id="novaH1Comments" rows="5" maxlength="1200">${esc(b.notes||'')}</textarea><button class="action" onclick="novaH1SendDraft()">Attach investigation to NOVA</button><button class="action secondary" onclick="novaH1DraftIndex=-1;show('BugHunter')">Cancel</button></div>`;}
-if(t!=='NOVA AI'){
+if(!['NOVA AI','Overview','Agents','Eclipse','Hermes'].includes(t)){
  h += `<div class="item">
   <button class="action" onclick="novaAskFromScreen()">✦ Ask NOVA about ${esc(t)}</button>
   <p class="note">Private, on-device assistance using this screen's current data.</p>
