@@ -221,7 +221,7 @@ function novaFinanceRemove(id){if(!confirm('Delete this ledger entry?'))return;t
 function show(t){if(t==='NOVA Copilot')t='NOVA AI';tab=t;const menu=document.getElementById('nav');if(menu)menu.classList.remove('open');nav();let h='';if(t==='Agent Tasks')h=novaAgentRender();if(t==='NOVA Copilot')h=novaCopilotRender();if(t==='Security Lab')h=novaLabRender();if(t==='Finance')h=novaFinanceRender();if(t==='Overview'){h=`<h1>Your workspace</h1><p class="note">Choose what you want to work on. Everything else stays in its category.</p><div class="nova-hub"><button onclick="show('NOVA AI')">✦ Launch NOVA<small>Guided tasks and approvals</small></button><button onclick="show('Jobs')">▣ Find Jobs<small>Search and track opportunities</small></button><button onclick="novaEmpOpen()">☾ Eclipse<small>Company · Employee #001</small></button><button onclick="show('Security Lab')">⬡ Security Lab<small>Approved experiments</small></button><button onclick="show('Applications')">✓ Applications<small>Saved applications</small></button></div><details><summary>Activity summary</summary><button class="action" onclick="show('NOVA AI')">Launch NOVA Copilot</button><p class="note">Your private opportunity board. Search live remote openings, track applications, and organize bounty research.</p><div class="item"><div class="name">${jobs.length} fetched jobs</div><div class="meta">Live search results from Remotive; search required</div></div><div class="item"><div class="name">${saved.length} tracked applications</div><div class="meta">Stored locally on this phone</div></div><div class="item"><div class="name">${bounties.length} bounty notes</div><div class="meta">Manual research; verify authorization</div></div><button class="action" onclick="show('Jobs')">Search jobs</button></details>`}
 if(t==='Jobs'){h=`<h1>Jobs · Find opportunities</h1><p><button class="action secondary" onclick="show(&quot;Autopilot&quot;)">Autopilot</button><button class="action secondary" onclick="show(&quot;Applications&quot;)">Applications</button></p><p class="note">Search Remotive, Adzuna, or USAJOBS. Coverage and salary data vary by provider.</p><label>Source</label><select id="provider" onchange="provider=this.value;show('Jobs')"><option value="remotive">Remotive (no key)</option><option value="adzuna">Adzuna (local)</option><option value="usajobs">USAJOBS (federal)</option></select><label>Location (Adzuna / USAJOBS)</label><input id="location" value="${attr(jobLocation)}" placeholder="Columbus, OH"><label>Job title or keyword</label><input id="q" value="${attr(query)}" placeholder="Help desk, junior IT, Python..."><button class="action" onclick="searchJobs()">${loading?'Searching…':'Search live jobs'}</button><div class="filters"><div><label>Work arrangement</label><select id="work" onchange="setFilter('work',this.value)"><option value="any">Any available</option><option value="remote">Remote</option><option value="onsite">On-site (not in this source)</option></select></div><div><label>Employment</label><select id="type" onchange="setFilter('type',this.value)"><option value="any">Any</option><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="internship">Internship</option></select></div><div><label>Minimum listed annual pay</label><select id="salary" onchange="setFilter('salary',this.value)"><option value="0">Any / undisclosed</option><option value="40000">$40,000+</option><option value="60000">$60,000+</option><option value="80000">$80,000+</option><option value="100000">$100,000+</option></select></div><div><label>Experience</label><select id="level" onchange="setFilter('level',this.value)"><option value="any">Any</option><option value="entry">Entry-level titles</option></select></div></div><p class="note" id="status">${loading?'Fetching live postings…':error?esc(error):searched?`${filtered().length} matches from ${jobs.length} fetched postings`:'Run a search to begin.'}</p><div id="results">${filtered().map((j)=>jobCard(j,jobs.indexOf(j))).join('')|| (searched&&!loading?'<div class="empty">No matches. Try broader keywords or filters.</div>':'')}</div>`;}
 
-if(t==='NOVA AI'){h=hqPanel()+`<div class="hq-conversation" aria-live="polite">${novaAiRender()}</div><div class="hq-composer"><label for="novaAiInput">Message ${esc(hqName())}</label><textarea id="novaAiInput" maxlength="5000" rows="3" placeholder="Ask a question or assign a task…"></textarea><button class="action" onclick="novaAiSend()" ${novaAiBusy?'disabled':''}>Send message →</button>${novaAiBusy?'<button class="action secondary" onclick="novaAiCancel()">Cancel generation</button>':''}</div><details class="hq-tools"><summary>Tools and advanced actions</summary><button class="action secondary" onclick="novaNewConversation()">New conversation</button>${novaApprovalDesk()}<button class="action secondary" onclick="novaPaste('novaAiInput')">Paste</button><button class="action secondary" onclick="show('Security Lab')">Open Security Lab</button></details>`;}
+if(t==='NOVA AI'){h=hqPanel()+(hqChannel==='meeting'?'<button class="action" onclick="hqDiscussOpen()">Discuss with team</button>':'')+`<div class="hq-conversation" aria-live="polite">${novaAiRender()}</div><div class="hq-composer"><label for="novaAiInput">Message ${esc(hqName())}</label><textarea id="novaAiInput" maxlength="5000" rows="3" placeholder="Ask a question or assign a task…"></textarea><button class="action" onclick="novaAiSend()" ${novaAiBusy?'disabled':''}>Send message →</button>${novaAiBusy?'<button class="action secondary" onclick="novaAiCancel()">Cancel generation</button>':''}</div><details class="hq-tools"><summary>Tools and advanced actions</summary><button class="action secondary" onclick="novaNewConversation()">New conversation</button>${novaApprovalDesk()}<button class="action secondary" onclick="novaPaste('novaAiInput')">Paste</button><button class="action secondary" onclick="show('Security Lab')">Open Security Lab</button></details>`;}
 
 if(t==='Autopilot'){const st=apStats();h=`<h1>NOVA Autopilot</h1><p class="note">Local-first campaign assistant. Searches existing providers, scores jobs, drafts editable materials and queues applications for your review. No automatic submissions.</p><div class="item"><div class="name">${st.ready} awaiting review · ${st.approved} approved · ${st.submitted} confirmed submitted</div><div class="meta">${st.today}/${apSettings.dailyLimit} approved today · ${apQueue.length} total queued · ${st.interviews} interviews</div></div><h2>Campaign settings</h2><div class="autopilot-grid"><div><label>Minimum match score</label><input id="apMin" type="number" min="0" max="100" value="${apSettings.minimumScore}"></div><div><label>Daily approval limit</label><input id="apLimit" type="number" min="1" max="50" value="${apSettings.dailyLimit}"></div></div><label>Job search keyword</label><input id="apQuery" value="${attr(apSettings.keyword)}" placeholder="help desk"><label>Location</label><input id="apLocation" value="${attr(apSettings.location)}" placeholder="Columbus, OH"><label>Job source</label><select id="apProvider"><option value="remotive">Remotive (no key)</option><option value="adzuna">Adzuna (requires key)</option><option value="usajobs">USAJOBS (requires key)</option></select><p><button class="action" onclick="apDiscover()">Discover and score jobs</button><button class="action secondary" onclick="apSaveSettings()">Save settings</button></p><p class="note" id="apMessage">${esc(apMessage)}</p><h2>Resume Intelligence</h2><p class="note">Import PDF, DOCX or TXT using Android's document picker. Extraction is local. Check all details before using them in applications.</p><button class="action secondary" onclick="apImportResume()">Import resume</button><button class="action secondary" onclick="apClearResume()">Clear imported resume</button><p class="note" id="apResumeMessage">${esc(apResumeMessage)}</p><label>Imported resume (editable; not yet verified)</label><textarea id="apResumeText" rows="7" placeholder="Import or paste your resume here">${esc(apResumeText)}</textarea><button class="action secondary" onclick="apSaveResumeText()">Save imported text locally</button><button class="action secondary" onclick="apUseResumeForProfile()">Copy into verified profile for review</button><h2>Verified profile for drafts</h2><p class="note">Enter only skills and experience you can substantiate. No invented qualifications; drafts require review.</p><label>Full name</label><input id="apName" value="${attr(apProfile.name)}" placeholder="Your name"><label>Verified experience and skills</label><textarea id="apExperience" rows="4" placeholder="Describe real experience, skills, and achievements">${esc(apProfile.experience)}</textarea><label>Contact details for draft (optional)</label><input id="apContact" value="${attr(apProfile.contact)}" placeholder="Email / phone"><button class="action secondary" onclick="apSaveProfile()">Save draft profile locally</button><h2>Approval queue</h2>${apQueue.length?apQueue.map((a,i)=>`<div class="autopilot-row"><div class="name">${esc(a.title)}</div><div class="meta">${esc(a.company)} · ${esc(a.location)} · ${esc(a.provider)} · Match ${a.match}%</div><span class="autopilot-status">${esc(a.status)}</span><p class="note">${esc(a.reason)}</p><div class="autopilot-controls"><button class="action secondary" onclick="apDraft(${i})">Draft letter</button><button class="action secondary" onclick="apOpen(${i})">Open posting</button>${a.status==='Review'?`<button class="action" onclick="apApprove(${i})">Approve</button>`:''}${a.status==='Approved'?`<button class="action" onclick="apConfirmSubmitted(${i})">Confirm submitted</button>`:''}${a.status==='Submitted'?`<button class="action" onclick="apInterview(${i})">Mark interview</button>`:''}<button class="action secondary" onclick="apRemove(${i})">Remove</button></div>${apDraftIndex===i?`<div class="autopilot-draft">${esc(apLetter(a))}</div><button class="action secondary" onclick="apCopyDraft(${i})">Copy draft</button>`:''}</div>`).join(''):'<div class="empty">No queued applications yet. Discover jobs to begin.</div>'}`;}
 if(t==='BugHunter'){h=`<h1>Security · HackerOne</h1><button class="action" onclick="show('Security Lab')">Open Security Lab</button><button class="action secondary" onclick="show(&quot;Audit&quot;)">Authorized audits</button><p class="note">HackerOne program discovery requires configured credentials. Scope and reward eligibility must be checked on the official page.</p><button class="action" onclick="loadPrograms()">Load HackerOne programs</button><button class="action secondary" onclick="novaH1BatchStart()">Research next 5</button><p><input id="novaH1Filter" placeholder="Filter loaded programs" oninput="novaH1FilterChanged(this.value)" value="${attr(novaH1Filter)}"></p><div class="item"><strong>Saved investigations</strong>${novaH1SavedHtml()}</div><p class="note">${esc(providerError)}</p>${programs.map((b,i)=>({b,i})).filter(x=>x.b.name.toLowerCase().includes(novaH1Filter.toLowerCase())).map(({b,i})=>novaH1Card(b,i)).join('')}<label>Program name</label><input id="bn" placeholder="Program name"><label>Official program URL</label><input id="bu" placeholder="https://..."><button class="action" onclick="addBounty()">Save program</button>`+bounties.map((b,i)=>`<div class="item"><div class="name">${esc(b.name)}</div><div class="meta">${esc(b.url)}</div><button class="action" onclick="openUrl('${encodeURIComponent(b.url)}')">Official scope</button><button class="action secondary" onclick="removeBounty(${i})">Remove</button></div>`).join('')}
@@ -496,12 +496,93 @@ function novaDisplayText(v){return esc(String(v||'')).replace(/\*\*([^*\n]+)\*\*
 const hqChannelKey='nova.hq.channel.v1',hqLogKey='nova.hq.logs.v1';
 let hqChannel=localStorage.getItem(hqChannelKey)||'general';
 let hqMeetingTurns=0,hqMeetingActive=false,hqSpeaker='NOVA';
+/* NOVA HQ V2 — bounded agent discussion state */
+let hqDiscussion={
+ active:false,
+ topic:'',
+ limit:6,
+ turns:0,
+ stopRequested:false,
+ resolving:false
+};
 try{const prior=JSON.parse(localStorage.getItem('nova.hq.logs.v1')||'{}');if(Array.isArray(prior[hqChannel]))novaAiMessages=prior[hqChannel].slice(-50)}catch(e){}
 function hqRead(){try{const x=JSON.parse(localStorage.getItem(hqLogKey)||'{}');return x&&typeof x==='object'?x:{}}catch(e){return {}}}
 function hqSave(){const x=hqRead();x[hqChannel]=novaAiMessages.slice(-50);localStorage.setItem(hqLogKey,JSON.stringify(x))}
 function hqSwitch(c){if(!['general','eclipse','meeting'].includes(c)||novaAiBusy)return;hqSave();hqChannel=c;localStorage.setItem(hqChannelKey,c);novaAiMessages=(hqRead()[c]||[]).slice(-50);hqMeetingActive=false;hqMeetingTurns=0;show('NOVA AI')}
 function hqName(){return hqChannel==='eclipse'?'ECLIPSE':hqChannel==='meeting'?'Team meeting':'NOVA'}
-function hqPanel(){return '<div class="hq-head"><div><span class="hq-eyebrow">PRIVATE WORKSPACE / '+(hqChannel==='meeting'?'TEAM':hqChannel==='eclipse'?'SECURITY':'GENERAL')+'</span><h1>'+hqName()+'</h1><p class="note">'+(hqChannel==='meeting'?'NOVA + Eclipse · moderated collaboration':hqChannel==='eclipse'?'Employee 001 · Security research':'Manager · coordination and assignments')+'</p></div><span class="hq-status">● LOCAL</span></div><div class="hq-channels"><button class="'+(hqChannel==='general'?'on':'')+'" onclick="hqSwitch(\'general\')">NOVA</button><button class="'+(hqChannel==='eclipse'?'on':'')+'" onclick="hqSwitch(\'eclipse\')">Eclipse</button><button class="'+(hqChannel==='meeting'?'on':'')+'" onclick="hqSwitch(\'meeting\')">Team meeting</button></div>'+(hqChannel==='eclipse'?'<div class="hq-shortcuts"><button onclick="show(\'Security Lab\')">Security Lab ↗</button><button onclick="novaEmpOpen()">Employee desk ↗</button></div>':'')+(hqChannel==='meeting'?'<p class="hq-help">Each message invites NOVA and Eclipse to respond in sequence (maximum two agent turns). No tools run automatically.</p>':'')}
+function hqPanel(){return '<div class="hq-head"><div><span class="hq-eyebrow">'+(hqChannel==='meeting'?'DISCUSSION':hqChannel==='eclipse'?'SECURITY':'WORKSPACE')+'</span><h1>'+hqName()+'</h1><p class="note">'+(hqChannel==='meeting'?'NOVA and Eclipse':hqChannel==='eclipse'?'Security research':'Your AI workspace')+'</p></div><span class="hq-status">● On-device</span></div><div class="hq-channels"><button class="'+(hqChannel==='general'?'on':'')+'" onclick="hqSwitch(\'general\')">NOVA</button><button class="'+(hqChannel==='eclipse'?'on':'')+'" onclick="hqSwitch(\'eclipse\')">Eclipse</button><button class="'+(hqChannel==='meeting'?'on':'')+'" onclick="hqSwitch(\'meeting\')">Team meeting</button></div>'+(hqChannel==='eclipse'?'<div class="hq-shortcuts"><button onclick="show(\'Security Lab\')">Security Lab ↗</button><button onclick="novaEmpOpen()">Employee desk ↗</button></div>':'')+(hqChannel==='meeting'?'<p class="hq-help">Each message invites NOVA and Eclipse to respond in sequence (maximum two agent turns). No tools run automatically.</p>':'')}
+
+/* NOVA HQ V2 — discussion setup */
+function hqDiscussOpen(){
+ if(novaAiBusy)return;
+ const topic=document.getElementById('novaAiInput')?.value.trim()||'';
+ const existing=document.getElementById('hqDiscussModal');
+ if(existing)existing.remove();
+
+ const modal=document.createElement('div');
+ modal.id='hqDiscussModal';
+ modal.style.cssText='position:fixed;inset:0;z-index:9999;background:#000c;display:flex;align-items:center;justify-content:center;padding:20px';
+
+ modal.innerHTML=`
+ <section role="dialog" aria-modal="true" aria-label="Team discussion settings"
+ style="background:#17212b;color:#e7edf4;border:1px solid #486174;border-radius:16px;padding:20px;width:100%;max-width:420px;max-height:85vh;overflow:auto">
+ <h2>Team discussion</h2>
+ <p>NOVA and Eclipse will discuss a topic and work toward a resolution.</p>
+ <label for="hqDiscussTopic">Discussion topic</label>
+ <textarea id="hqDiscussTopic" rows="4" maxlength="2000" style="width:100%"></textarea>
+ <label for="hqDiscussLimit">Maximum agent responses</label>
+ <select id="hqDiscussLimit" style="width:100%">
+ <option value="4">4 responses</option>
+ <option value="6" selected>6 responses</option>
+ <option value="10">10 responses</option>
+ </select>
+ <p class="note">No tools or external actions will run automatically.</p>
+ <button class="action" onclick="hqDiscussStart()">Start discussion</button>
+ <button class="action secondary" onclick="hqDiscussClose()">Cancel</button>
+ </section>`;
+
+ document.body.appendChild(modal);
+ document.getElementById('hqDiscussTopic').value=topic;
+ document.getElementById('hqDiscussTopic').focus();
+}
+function hqDiscussClose(){
+ document.getElementById('hqDiscussModal')?.remove();
+}
+function hqDiscussStart(){
+ const topic=document.getElementById('hqDiscussTopic')?.value.trim();
+ const limit=Number(document.getElementById('hqDiscussLimit')?.value);
+ if(!topic){alert('Enter a discussion topic');return}
+ if(![4,6,10].includes(limit))return;
+ if(hqChannel!=='meeting'||novaAiBusy)return;
+ if(!window.Nova||typeof Nova.novaGenerate!=='function'){
+  alert('Native AI engine unavailable');
+  return;
+ }
+ hqDiscussClose();
+ hqDiscussion={active:true,topic,limit,turns:0,stopRequested:false,resolving:false};
+ hqMeetingActive=false;
+ hqSpeaker='NOVA';
+ novaAiMessages.push({role:'You',text:topic});
+ hqSave();
+ novaAiBusy=true;
+ novaAiCancelRequested=false;
+ novaAiStalled=false;
+ const id=++novaAiRequest;
+ novaAiWatch(id);
+ const prompt=hqContext(topic,'NOVA')+
+  '\\n\\nDISCUSSION ROUND 1: Define the problem, identify what is known, and invite Eclipse to examine a specific question. Do not claim any tools were executed.';
+ try{
+  Nova.novaGenerate(prompt.slice(0,3100),id);
+ }catch(e){
+  novaAiStopWatchdog();
+  novaAiBusy=false;
+  hqDiscussion.active=false;
+  novaAiMessages.push({role:'NOVA',text:'Discussion could not start: '+String(e)});
+  hqSave();
+ }
+ show('NOVA AI');
+}
+
 function hqDecorate(m){const role=m.role==='You'?'You':m.role==='ECLIPSE'?'ECLIPSE':'NOVA';return '<div class="hq-msg '+(role==='You'?'mine':'')+'"><div class="hq-avatar">'+(role==='ECLIPSE'?'E':role==='NOVA'?'N':'Y')+'</div><div class="hq-bubble"><div class="hq-author">'+esc(role)+'</div><div class="hq-body">'+novaFormatAnswer(m.text)+'</div></div></div>'}
 function hqRoute(text){const t=String(text||'').trim();if(/^hey[ ,]+eclipse[.!?]*$/i.test(t)){hqSwitch('eclipse');return true}if(/^hey[ ,]+nova[.!?]*$/i.test(t)){hqSwitch('general');return true}return false}
 function hqContext(message,speaker){let evidence='';try{const x=JSON.parse(localStorage.getItem('nova.lab.last.v1')||'null');if(x&&x.environment==='offline_mock')evidence='Latest OFFLINE mock evidence: '+JSON.stringify(x).slice(0,650)}catch(e){}
@@ -950,4 +1031,195 @@ if(changed)save(a);draw();
 draw();
 })();
 </script>
+
+<style id="nova-professional-v3">
+/* NOVA_PROFESSIONAL_V3 */
+:root{
+ --paper:#101419;
+ --ink:#e8edf2;
+ --copper:#65a9ae;
+ --line:#303a43;
+ --hq-border:#303a43;
+ --hq-text:#e8edf2;
+ --hq-muted:#9ba9b4;
+ --hq-accent:#65a9ae;
+ color-scheme:dark;
+}
+body{
+ background:#101419!important;
+ color:#e8edf2!important;
+ font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important;
+}
+.top,header.top{
+ background:#171d24!important;
+ border-bottom:1px solid #303a43!important;
+ box-shadow:none!important;
+ backdrop-filter:none!important;
+}
+.brand{
+ background:none!important;
+ -webkit-text-fill-color:#e8edf2!important;
+ color:#e8edf2!important;
+ font-size:19px!important;
+ font-weight:700!important;
+ letter-spacing:.025em!important;
+}
+.star{color:#65a9ae!important;text-shadow:none!important}
+.menu{
+ color:#c4d0d8!important;
+ border:1px solid #39444e!important;
+ border-radius:8px!important;
+}
+.item,.card,.empty,#content .item{
+ background:#192129!important;
+ border:1px solid #303a43!important;
+ border-radius:10px!important;
+ box-shadow:none!important;
+}
+.action,button.action,#content .action:not(.secondary){
+ background:#346e76!important;
+ color:#f4fbfc!important;
+ border:1px solid #45858d!important;
+ border-radius:8px!important;
+ box-shadow:none!important;
+ font-weight:600!important;
+}
+.action.secondary,button.action.secondary{
+ background:#222c35!important;
+ color:#d3dee6!important;
+ border:1px solid #394752!important;
+ box-shadow:none!important;
+}
+input,select,textarea{
+ background:#141b22!important;
+ color:#e8edf2!important;
+ border:1px solid #3a4853!important;
+ border-radius:8px!important;
+}
+input:focus,select:focus,textarea:focus{
+ outline:2px solid #65a9ae!important;
+ outline-offset:1px;
+}
+.nova-bottom-nav button.active{
+ background:#25353b!important;
+ border-color:#477d83!important;
+ color:#d8f0f0!important;
+ box-shadow:none!important;
+ animation:none!important;
+}
+.nova-bottom-nav button.active span{filter:none!important}
+.hq-conversation{
+ background:#151c23!important;
+ border-color:#303a43!important;
+ border-radius:10px!important;
+}
+.hq-bubble{
+ background:#222d36!important;
+ border-color:#34414b!important;
+ border-radius:9px!important;
+}
+.hq-msg.mine .hq-bubble{background:#28383e!important}
+.hq-composer,.hq-tools{
+ background:#192129!important;
+ border-color:#303a43!important;
+ border-radius:10px!important;
+}
+.hq-channels button,.hq-shortcuts button{
+ border-radius:8px!important;
+ box-shadow:none!important;
+}
+.nova-orb{box-shadow:none!important;animation:none!important}
+#novaEmpLauncher{
+ background:#26373e!important;
+ color:#d9edef!important;
+ border:1px solid #477d83!important;
+ border-radius:10px!important;
+ box-shadow:none!important;
+}
+#novaEmpDesk{
+ background:#171e25!important;
+ color:#e8edf2!important;
+ border:1px solid #394752!important;
+ border-radius:12px!important;
+ box-shadow:none!important;
+}
+#novaEmpDesk button{
+ background:#26343d!important;
+ color:#e8edf2!important;
+ border:1px solid #43535e!important;
+ border-radius:8px!important;
+}
+#novaEmpDesk .novaEmpJob{
+ background:#1d2730!important;
+ border-color:#36444e!important;
+ border-radius:9px!important;
+}
+#novaEmpDesk h2{color:#dbe9ed!important}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{animation:none!important}
+}
+
+/* NOVA_V3_CONVERSATION */
+.hq-conversation{
+ background:transparent!important;
+ border:0!important;
+ border-radius:0!important;
+ padding:0!important;
+ margin:12px 0 18px!important;
+ min-height:260px;
+}
+.hq-msg,.hq-msg.mine{
+ display:flex!important;
+ flex-direction:row!important;
+ align-items:flex-start;
+ gap:12px;
+ padding:16px 2px;
+ margin:0!important;
+ border-bottom:1px solid #27313a;
+}
+.hq-msg:last-child{border-bottom:0}
+.hq-avatar{
+ width:34px;
+ height:34px;
+ border-radius:8px!important;
+ background:#263b42!important;
+ color:#b7e1e2!important;
+ font-size:13px;
+}
+.hq-msg.mine .hq-avatar{
+ background:#343d48!important;
+ color:#dce4eb!important;
+}
+.hq-bubble,.hq-msg.mine .hq-bubble{
+ flex:1;
+ max-width:none!important;
+ min-width:0;
+ padding:0!important;
+ border:0!important;
+ border-radius:0!important;
+ background:transparent!important;
+ box-shadow:none!important;
+}
+.hq-author{
+ font-size:13px;
+ font-weight:650;
+ color:#d9e5eb;
+ margin-bottom:6px;
+}
+.hq-body{
+ font-size:14px;
+ line-height:1.65;
+ color:#cbd5de;
+}
+.hq-composer{
+ padding:12px!important;
+ border-radius:10px!important;
+}
+.hq-composer textarea{
+ min-height:72px;
+ resize:vertical;
+}
+
+</style>
+
 </body></html>
