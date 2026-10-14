@@ -242,6 +242,50 @@ a {
 }
 </style>
 
+
+<!-- NOVA_OBSIDIAN_THEME_V1 -->
+<style id="nova-obsidian-v1">
+:root{
+ color-scheme:dark;
+ --paper:#060c15;--ink:#f1f7ff;--copper:#319fff;--line:#315a78;
+ --panel:#091726;--hq-border:#315a78;--hq-text:#f1f7ff;
+ --hq-muted:#9fb8d0;--hq-accent:#42b6ff;
+}
+html,body{min-height:100%;color:#f1f7ff!important;font-family:system-ui,-apple-system,"Segoe UI",sans-serif!important}
+body{
+ background:
+ radial-gradient(circle at 88% 8%,rgba(65,159,255,.25) 0 3%,rgba(6,22,45,.85) 9%,transparent 24%),
+ radial-gradient(ellipse 85% 34% at 85% 4%,rgba(27,87,151,.58),transparent 75%),
+ radial-gradient(ellipse 90% 38% at 12% 43%,rgba(18,53,86,.65),transparent 80%),
+ linear-gradient(165deg,#02050b,#071421 46%,#02060c)!important;
+ background-attachment:fixed!important;
+}
+body:before{content:"";position:fixed;z-index:-1;pointer-events:none;right:-24vw;top:5vh;
+ width:82vw;height:82vw;border-radius:50%;
+ background:radial-gradient(circle at 27% 28%,rgba(125,192,242,.55),rgba(25,68,115,.65) 21%,#081b32 47%,#01040a 69%);
+ box-shadow:-18px -12px 75px rgba(61,141,224,.25),inset 16px 12px 30px rgba(150,209,255,.13);
+ opacity:.78}
+header.top,.top{background:rgba(3,10,20,.79)!important;border-bottom:1px solid #24445f!important;box-shadow:none!important;backdrop-filter:blur(12px)}
+.brand{background:none!important;-webkit-text-fill-color:#eef7ff!important;color:#eef7ff!important;letter-spacing:.035em!important}
+.star,.menu{color:#4db8ff!important}
+#content .item,#content .card,.nova-hero,.nova-category,.hq-conversation,.hq-composer,.eclipse-scout{
+ background:rgba(3,14,27,.78)!important;border:1px solid #285476!important;
+ border-radius:12px!important;box-shadow:0 7px 24px #0006!important;backdrop-filter:blur(7px)}
+#content .item:focus-within{border-color:#42b7ff!important}
+#content h1,#content h2,#content h3{color:#f4f9ff!important}
+.note,.meta,.hq-help{color:#b0c7d9!important}
+input,select,textarea{background:rgba(3,13,26,.92)!important;color:#f4f9ff!important;border:1px solid #315a7a!important}
+#content button.action:not(.secondary){background:linear-gradient(180deg,#1978cb,#07519e)!important;border:1px solid #3caeff!important;color:white!important;box-shadow:none!important}
+#content button.action.secondary{background:#0b2034!important;border:1px solid #315777!important;color:#d9edff!important}
+.nova-bottom-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important;background:rgba(2,10,21,.96)!important;border-top:1px solid #2b5979!important}
+.nova-bottom-nav button{color:#c1d7e9!important}
+.nova-bottom-nav button.active{background:#092747!important;border-color:#1f6ca7!important;color:#60c6ff!important;animation:none!important;box-shadow:none!important}
+#nav.open{background:#071522!important}
+@media(max-width:899px){body{padding-top:max(24px,env(safe-area-inset-top,0px))!important}
+main{padding-bottom:calc(110px + env(safe-area-inset-bottom,0px))!important}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important}}
+</style>
+
 </head><body><header class="top"><span class="star">✦</span><span class="brand">NOVA BOARD</span><button class="menu" onclick="toggleMenu()" aria-label="Toggle menu">☰</button></header><div class="layout"><aside id="nav"></aside><main id="content"></main></div><nav id="novaBottomNav" class="nova-bottom-nav" aria-label="Primary navigation"></nav>
 <script>
 window.addEventListener('error', function(e) {
@@ -277,7 +321,7 @@ function novaEmpReject(){if(typeof window.novaEmpReject==="function")return wind
 const tabs=['Overview','Finance','Hermes','Jobs','Autopilot','NOVA AI','BugHunter','Applications','Learn','Audit','Agent Tasks','Settings'];let tab='Overview',jobs=[],query='',searched=false,loading=false,error='',req=0;let saved=load('nova.saved'),bounties=load('nova.bounties');let provider='remotive',jobLocation='Columbus, OH',configReq=0,providerReq=0,providerPending='',programs=[],providerError='';let auditReq=0,auditHistory=load('nova.auditHistory');let filters={work:'any',type:'any',salary:'0',level:'any'};
 function load(k){try{const v=JSON.parse(localStorage.getItem(k)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}function persist(){localStorage.setItem('nova.saved',JSON.stringify(saved));localStorage.setItem('nova.bounties',JSON.stringify(bounties))}function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function attr(s){return esc(s)}/* NOVA_WORKSPACE_NAV_V2 */
 function novaNavGroup(t){if(t==='Overview')return 'Home';if(['Hermes','Jobs','Autopilot','Applications'].includes(t))return 'Jobs';if(['NOVA AI','Agent Tasks','NOVA Copilot'].includes(t))return 'NOVA AI';if(['BugHunter','Audit','Security Lab'].includes(t))return 'Security';return 'More'}
-const novaPrimary=[['Home','Overview','⌂'],['Jobs','Jobs','▣'],['NOVA AI','NOVA AI','✦'],['Security','BugHunter','⬡'],['More','Settings','☰']];
+const novaPrimary=[['Board','Overview','⌂'],['NOVA','NOVA AI','✦'],['Agents','Hermes','▦']];
 function novaGoPrimary(label){if(label==='More'){toggleMenu();return;}const n=document.getElementById('nav');if(n)n.classList.remove('open');const entry=novaPrimary.find(x=>x[0]===label);if(entry)show(entry[1]);}
 function toggleMenu(){const n=document.getElementById('nav');n.classList.toggle('open');n.setAttribute('aria-hidden',String(!n.classList.contains('open')))}
 function nav(){
