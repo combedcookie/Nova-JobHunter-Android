@@ -247,6 +247,151 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
   }, "nova-model-downloader").start();
  }
 
+
+ // ECLIPSE_V44_NATIVE_HTTP — dedicated request broker; all per-request permissions enforced here.
+ private static final class EclipseV44Job {
+  final int id; final String url,host,path,method;
+  final java.util.concurrent.atomic.AtomicBoolean finished=new java.util.concurrent.atomic.AtomicBoolean(false);
+  volatile boolean cancelled=false;
+  volatile java.net.HttpURLConnection connection;
+  volatile android.app.AlertDialog dialog;
+  EclipseV44Job(int id,String url,String host,String path,String method){this.id=id;this.url=url;this.host=host;this.path=path;this.method=method;}
+ }
+ private final java.util.concurrent.atomic.AtomicReference<EclipseV44Job> eclipseV44Current=new java.util.concurrent.atomic.AtomicReference<>();
+ private volatile long eclipseV44LastNetwork=0;
+ private static final class EclipseV44Database extends android.database.sqlite.SQLiteOpenHelper {
+  EclipseV44Database(android.content.Context c){super(c,"eclipse_v44_evidence.db",null,1);}
+  @Override public void onCreate(android.database.sqlite.SQLiteDatabase db){db.execSQL("CREATE TABLE evidence (id INTEGER PRIMARY KEY AUTOINCREMENT, at_ms INTEGER NOT NULL, host TEXT NOT NULL, path TEXT NOT NULL, method TEXT NOT NULL, status INTEGER NOT NULL, sample_bytes INTEGER NOT NULL, sample_sha256 TEXT, sample_truncated INTEGER NOT NULL, headers_json TEXT NOT NULL)");}
+  @Override public void onUpgrade(android.database.sqlite.SQLiteDatabase db,int oldVersion,int newVersion){throw new IllegalStateException("Unsupported evidence migration: preserve database");}
+ }
+ private void eclipseV44Finish(EclipseV44Job job,boolean ok,String message){
+  if(!job.finished.compareAndSet(false,true))return;
+  eclipseV44Current.compareAndSet(job,null);
+  reply("eclipseV44Result",job.id,ok,message);
+ }
+ private static String eclipseV44Host(String host)throws Exception {
+  if(host==null||host.length()>253||host.length()<4||!host.contains(".")||host.endsWith(".")||host.contains(".."))throw new Exception("A public DNS hostname is required");
+  String h=host.toLowerCase(java.util.Locale.ROOT);
+  if(h.matches("[0-9.]+")||h.contains(":"))throw new Exception("IP addresses are not supported");
+  for(String part:h.split("\\.",-1))if(!part.matches("[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?"))throw new Exception("Invalid hostname label");
+  for(String suffix:new String[]{".localhost",".local",".internal",".test",".invalid",".example"})if(h.endsWith(suffix))throw new Exception("Local or reserved domains are blocked");
+  return h;
+ }
+ private static EclipseV44Job eclipseV44Validate(int id,String url,String scope,String method)throws Exception {
+  if(url==null||url.length()>350||!url.startsWith("https://"))throw new Exception("Use an HTTPS URL under 350 characters");
+  if(scope==null)throw new Exception("Scope hostname missing");
+  String expected=eclipseV44Host(scope.trim());
+  java.net.URI parsed=new java.net.URI(url);
+  if(!"https".equalsIgnoreCase(parsed.getScheme())||parsed.getRawUserInfo()!=null||parsed.getPort()!=-1||parsed.getRawQuery()!=null||parsed.getRawFragment()!=null)throw new Exception("No custom port, login, query parameters or fragment allowed");
+  String actual=eclipseV44Host(parsed.getHost());
+  if(!actual.equals(expected))throw new Exception("Target hostname does not match approved scope exactly");
+  String path=parsed.getRawPath();if(path==null||path.isEmpty())path="/";
+  if(path.length()>256||!path.matches("/[A-Za-z0-9._~/-]*")||path.contains("..")||!path.equals(new java.net.URI(path).normalize().getRawPath()))throw new Exception("Use a short simple path without encoding or traversal");
+  if(!("HEAD".equals(method)||"GET".equals(method)))throw new Exception("Only HEAD and GET are allowed");
+  return new EclipseV44Job(id,"https://"+actual+path,actual,path,method);
+ }
+ private static void eclipseV44CheckPublicDns(String hostname)throws Exception {
+  java.net.InetAddress[] addresses=java.net.InetAddress.getAllByName(hostname);
+  if(addresses.length<1||addresses.length>12)throw new Exception("DNS resolution refused");
+  for(java.net.InetAddress address:addresses){
+   byte[] b=address.getAddress();
+   if(address.isAnyLocalAddress()||address.isLoopbackAddress()||address.isSiteLocalAddress()||address.isLinkLocalAddress()||address.isMulticastAddress())throw new Exception("Non-public address blocked");
+   if(b.length==4){int a=b[0]&255,c=b[1]&255,d=b[2]&255;
+    if(a==0||a>=224||a==100&&(c>=64&&c<=127)||a==192&&c==0&&d==0||a==198&&(c==18||c==19)||a==192&&c==0&&d==2||a==198&&c==51&&d==100||a==203&&c==0&&d==113)throw new Exception("Reserved IP blocked");
+   }else if(b.length==16){int a=b[0]&255,c=b[1]&255;
+    if((a&254)==252||(a==0x20&&c==0x01&&b[2]==0x0d&&(b[3]&255)==0xb8))throw new Exception("Non-public IPv6 blocked");
+   }else throw new Exception("Unsupported DNS address type");
+  }
+ }
+ private static String eclipseV44Digest(byte[] body){
+  try{byte[] hash=java.security.MessageDigest.getInstance("SHA-256").digest(body);StringBuilder hex=new StringBuilder();for(byte b:hash)hex.append(String.format(java.util.Locale.ROOT,"%02x",b&255));return hex.toString();}
+  catch(Exception e){throw new IllegalStateException("SHA-256 unavailable",e);}
+ }
+ private static String eclipseV44Headers(java.net.HttpURLConnection c){
+  org.json.JSONArray headers=new org.json.JSONArray();
+  for(String name:new String[]{"Strict-Transport-Security","Content-Security-Policy","X-Content-Type-Options","Referrer-Policy","Cache-Control","Content-Type","Permissions-Policy","Cross-Origin-Resource-Policy"}){
+   if(c.getHeaderField(name)!=null)headers.put(name);
+  }
+  return headers.toString();
+ }
+ private void eclipseV44SaveEvidence(org.json.JSONObject result)throws Exception {
+  EclipseV44Database helper=new EclipseV44Database(getApplicationContext());
+  android.database.sqlite.SQLiteDatabase db=helper.getWritableDatabase();
+  try{
+   android.content.ContentValues values=new android.content.ContentValues();
+   values.put("at_ms",result.getLong("at_ms"));values.put("host",result.getString("host"));values.put("path",result.getString("path"));values.put("method",result.getString("method"));
+   values.put("status",result.getInt("status"));values.put("sample_bytes",result.getInt("sample_bytes"));values.put("sample_sha256",result.optString("sample_sha256",""));
+   values.put("sample_truncated",result.optBoolean("sample_truncated",false)?1:0);values.put("headers_json",result.getJSONArray("headers_present").toString());
+   db.beginTransaction();try{
+    if(db.insertOrThrow("evidence",null,values)<0)throw new Exception("Evidence insert failed");
+    db.execSQL("DELETE FROM evidence WHERE id NOT IN (SELECT id FROM evidence ORDER BY id DESC LIMIT 100)");
+    db.setTransactionSuccessful();
+   }finally{db.endTransaction();}
+  }finally{helper.close();}
+ }
+ private org.json.JSONArray eclipseV44ReadHistory()throws Exception {
+  EclipseV44Database helper=new EclipseV44Database(getApplicationContext());
+  android.database.sqlite.SQLiteDatabase db=helper.getReadableDatabase();
+  org.json.JSONArray out=new org.json.JSONArray();
+  try(android.database.Cursor rows=db.rawQuery("SELECT id,at_ms,host,path,method,status,sample_bytes,sample_sha256,sample_truncated,headers_json FROM evidence ORDER BY id DESC LIMIT 100",null)){
+   while(rows.moveToNext()){
+    org.json.JSONObject x=new org.json.JSONObject().put("id",rows.getLong(0)).put("at_ms",rows.getLong(1)).put("host",rows.getString(2))
+     .put("path",rows.getString(3)).put("method",rows.getString(4)).put("status",rows.getInt(5)).put("sample_bytes",rows.getInt(6))
+     .put("sample_sha256",rows.getString(7)).put("sample_truncated",rows.getInt(8)!=0)
+     .put("headers_present",new org.json.JSONArray(rows.getString(9)));
+    out.put(x);
+   }
+  }finally{helper.close();}
+  return out;
+ }
+ private void eclipseV44Perform(EclipseV44Job job){
+  java.net.HttpURLConnection c=null;
+  try{
+   if(job.cancelled)throw new java.io.InterruptedIOException("Cancelled before network");
+   // DNS preflight refuses private and reserved ranges. No redirect or cookies are allowed.
+   // For hostile DNS services this does not prevent DNS rebinding between resolution and connect;
+   // only test exact hostnames whose ownership and rules were independently verified.
+   eclipseV44CheckPublicDns(job.host);
+   if(job.cancelled)throw new java.io.InterruptedIOException("Cancelled before network");
+   long now=android.os.SystemClock.elapsedRealtime();
+   if(now-eclipseV44LastNetwork<5000L)throw new Exception("Wait at least 5 seconds between V4.4 requests");
+   eclipseV44LastNetwork=now;
+   java.net.URL target=new java.net.URL(job.url);
+   c=(java.net.HttpURLConnection)target.openConnection(java.net.Proxy.NO_PROXY);
+   job.connection=c;
+   c.setInstanceFollowRedirects(false);c.setUseCaches(false);c.setAllowUserInteraction(false);
+   c.setRequestMethod(job.method);c.setConnectTimeout(8000);c.setReadTimeout(10000);
+   c.setRequestProperty("Accept-Encoding","identity");
+   c.setRequestProperty("User-Agent","NOVA-Eclipse/4.4 (single-approved-request)");
+   if(job.cancelled)throw new java.io.InterruptedIOException("Cancelled before network");
+   int status=c.getResponseCode();
+   if(job.cancelled)throw new java.io.InterruptedIOException("Request cancelled");
+   String observedHeaders=eclipseV44Headers(c);
+   int sampled=0;boolean truncated=false;String hash="";
+   if("GET".equals(job.method)){
+    java.io.InputStream body=status>=400?c.getErrorStream():status>=300?null:c.getInputStream();
+    if(body!=null)try(java.io.InputStream in=body;java.io.ByteArrayOutputStream sample=new java.io.ByteArrayOutputStream()){
+     byte[] chunk=new byte[2048];int n;
+     while((n=in.read(chunk,0,Math.min(chunk.length,16385-sample.size())))!=-1){
+      if(job.cancelled)throw new java.io.InterruptedIOException("Request cancelled");
+      if(sample.size()+n>16384){sample.write(chunk,0,Math.max(0,16384-sample.size()));truncated=true;break;}
+      sample.write(chunk,0,n);if(sample.size()==16384){truncated=in.read()!=-1;break;}
+     }
+     byte[] sampleBytes=sample.toByteArray();sampled=sampleBytes.length;hash=eclipseV44Digest(sampleBytes);
+    }
+   }
+   if(job.cancelled)throw new java.io.InterruptedIOException("Request cancelled");
+   org.json.JSONObject result=new org.json.JSONObject().put("environment","approved_live_https").put("network_used",true)
+    .put("host",job.host).put("path",job.path).put("method",job.method).put("status",status).put("at_ms",System.currentTimeMillis())
+    .put("headers_present",new org.json.JSONArray(observedHeaders)).put("sample_bytes",sampled)
+    .put("sample_sha256",hash).put("sample_truncated",truncated)
+    .put("note","Metadata observation, not a verified security vulnerability. SHA-256 covers only the sampled bytes; HEAD has no body digest.");
+   eclipseV44SaveEvidence(result); // Evidence must persist before reporting success.
+   eclipseV44Finish(job,true,result.toString());
+  }catch(Exception e){eclipseV44Finish(job,false,e.getMessage()==null?"HTTPS request failed":e.getMessage());}
+  finally{if(c!=null)c.disconnect();job.connection=null;}
+ }
+
  public class Bridge{
  @JavascriptInterface public void novaGenerate(String prompt,int id){
   if(prompt==null||prompt.isEmpty()||prompt.length()>5000){reply("novaAiResult",id,false,"Invalid prompt");return;}
@@ -471,6 +616,51 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
    }).start()).show());
  }
 
+
+ // Eclipse V4.4: all calls come from untrusted WebView and must be validated natively.
+ @JavascriptInterface public void eclipseV44Request(String raw,String scope,String method,int id){
+  final EclipseV44Job job;
+  try{job=eclipseV44Validate(id,raw,scope,method);}catch(Exception e){reply("eclipseV44Result",id,false,e.getMessage());return;}
+  if(!eclipseV44Current.compareAndSet(null,job)){reply("eclipseV44Result",id,false,"Another V4.4 request is active");return;}
+  runOnUiThread(()->{
+   if(job.cancelled){eclipseV44Finish(job,false,"Cancelled");return;}
+   android.app.AlertDialog dialog=new android.app.AlertDialog.Builder(MainActivity.this)
+    .setTitle("Approve one Eclipse HTTPS request")
+    .setMessage("Method: "+job.method+"\nExact target: "+job.url+"\nUser-declared permitted host: "+job.host+"\n\nNo redirects, cookies, credentials, query parameters or automatic follow-up. Confirm that official rules permit this exact request. HTTPS network access is real.")
+    .setNegativeButton("Reject",(d,which)->eclipseV44Finish(job,false,"Rejected by owner"))
+    .setOnCancelListener(d->eclipseV44Finish(job,false,"Cancelled by owner"))
+    .setPositiveButton("Approve once",(d,which)->new Thread(()->eclipseV44Perform(job),"eclipse-v44-approved-request").start())
+    .create();
+   job.dialog=dialog;
+   if(!job.cancelled)dialog.show();else eclipseV44Finish(job,false,"Cancelled");
+  });
+ }
+ @JavascriptInterface public void eclipseV44Cancel(int id){
+  EclipseV44Job job=eclipseV44Current.get();if(job==null||job.id!=id)return;
+  job.cancelled=true;
+  java.net.HttpURLConnection c=job.connection;if(c!=null)c.disconnect();
+  android.app.AlertDialog d=job.dialog;if(d!=null)runOnUiThread(()->d.dismiss());
+  eclipseV44Finish(job,false,"Cancelled by owner (already-delivered requests cannot be undone)");
+ }
+ @JavascriptInterface public void eclipseV44History(int id){
+  new Thread(()->{try{reply("eclipseV44HistoryResult",id,true,eclipseV44ReadHistory().toString());}
+   catch(Exception e){reply("eclipseV44HistoryResult",id,false,"Local evidence database unavailable");}},"eclipse-v44-history").start();
+ }
+ @JavascriptInterface public void eclipseV44Clear(int id){
+  if(eclipseV44Current.get()!=null){reply("eclipseV44ClearResult",id,false,"Finish active request before deleting evidence");return;}
+  runOnUiThread(()->new android.app.AlertDialog.Builder(MainActivity.this)
+   .setTitle("Delete Eclipse evidence history?")
+   .setMessage("Delete all locally saved V4.4 observations? This cannot be undone.")
+   .setNegativeButton("Cancel",(d,w)->reply("eclipseV44ClearResult",id,false,"Not deleted"))
+   .setOnCancelListener(d->reply("eclipseV44ClearResult",id,false,"Not deleted"))
+   .setPositiveButton("Delete history",(d,w)->new Thread(()->{
+     try{if(eclipseV44Current.get()!=null)throw new Exception("Request in progress");EclipseV44Database helper=new EclipseV44Database(getApplicationContext());
+      try{helper.getWritableDatabase().delete("evidence",null,null);}finally{helper.close();}
+      reply("eclipseV44ClearResult",id,true,"Deleted");}
+     catch(Exception e){reply("eclipseV44ClearResult",id,false,"Could not delete evidence");}
+    },"eclipse-v44-delete-history").start()).show());
+ }
+
  @JavascriptInterface public void novaCopilotNotify(String title,String detail){
   if(title==null||detail==null||title.length()>100||detail.length()>300)return;
   runOnUiThread(()->copilotNotify(title,detail));
@@ -481,5 +671,6 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
  });}
  @JavascriptInterface public void open(String url){runOnUiThread(()->openExternal(url));}
  }
+ @Override protected void onDestroy(){EclipseV44Job job=eclipseV44Current.get();if(job!=null){job.cancelled=true;java.net.HttpURLConnection c=job.connection;if(c!=null)c.disconnect();}super.onDestroy();}
  @Override public void onBackPressed(){if(web.canGoBack())web.goBack();else super.onBackPressed();}
 }

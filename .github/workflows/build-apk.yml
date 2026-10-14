@@ -33,7 +33,7 @@ jobs:
           fi
           "$SDKMANAGER" 'platforms;android-35' 'build-tools;35.0.0' 'ndk;27.2.12479018' 'cmake;3.22.1'
       - name: Test dashboard
-        run: node --test test.cjs test-interactions.cjs test-ai-pipeline.cjs test-bounty-approval.cjs test-release-guards.cjs test-eclipse-stability.cjs
+        run: node --test test.cjs test-interactions.cjs test-ai-pipeline.cjs test-bounty-approval.cjs test-release-guards.cjs test-eclipse-stability.cjs test-eclipse-v44.cjs
       - name: Validate signing secrets
         env:
           KEYSTORE_B64: ${{ secrets.NOVA_KEYSTORE_BASE64 }}
