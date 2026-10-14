@@ -221,7 +221,7 @@ function novaFinanceRemove(id){if(!confirm('Delete this ledger entry?'))return;t
 function show(t){if(t==='NOVA Copilot')t='NOVA AI';tab=t;const menu=document.getElementById('nav');if(menu)menu.classList.remove('open');nav();let h='';if(t==='Agent Tasks')h=novaAgentRender();if(t==='NOVA Copilot')h=novaCopilotRender();if(t==='Security Lab')h=novaLabRender();if(t==='Finance')h=novaFinanceRender();if(t==='Overview'){h=`<h1>Your workspace</h1><p class="note">Choose what you want to work on. Everything else stays in its category.</p><div class="nova-hub"><button onclick="show('NOVA AI')">✦ Launch NOVA<small>Guided tasks and approvals</small></button><button onclick="show('Jobs')">▣ Find Jobs<small>Search and track opportunities</small></button><button onclick="novaEmpOpen()">☾ Eclipse<small>Company · Employee #001</small></button><button onclick="show('Security Lab')">⬡ Security Lab<small>Approved experiments</small></button><button onclick="show('Applications')">✓ Applications<small>Saved applications</small></button></div><details><summary>Activity summary</summary><button class="action" onclick="show('NOVA AI')">Launch NOVA Copilot</button><p class="note">Your private opportunity board. Search live remote openings, track applications, and organize bounty research.</p><div class="item"><div class="name">${jobs.length} fetched jobs</div><div class="meta">Live search results from Remotive; search required</div></div><div class="item"><div class="name">${saved.length} tracked applications</div><div class="meta">Stored locally on this phone</div></div><div class="item"><div class="name">${bounties.length} bounty notes</div><div class="meta">Manual research; verify authorization</div></div><button class="action" onclick="show('Jobs')">Search jobs</button></details>`}
 if(t==='Jobs'){h=`<h1>Jobs · Find opportunities</h1><p><button class="action secondary" onclick="show(&quot;Autopilot&quot;)">Autopilot</button><button class="action secondary" onclick="show(&quot;Applications&quot;)">Applications</button></p><p class="note">Search Remotive, Adzuna, or USAJOBS. Coverage and salary data vary by provider.</p><label>Source</label><select id="provider" onchange="provider=this.value;show('Jobs')"><option value="remotive">Remotive (no key)</option><option value="adzuna">Adzuna (local)</option><option value="usajobs">USAJOBS (federal)</option></select><label>Location (Adzuna / USAJOBS)</label><input id="location" value="${attr(jobLocation)}" placeholder="Columbus, OH"><label>Job title or keyword</label><input id="q" value="${attr(query)}" placeholder="Help desk, junior IT, Python..."><button class="action" onclick="searchJobs()">${loading?'Searching…':'Search live jobs'}</button><div class="filters"><div><label>Work arrangement</label><select id="work" onchange="setFilter('work',this.value)"><option value="any">Any available</option><option value="remote">Remote</option><option value="onsite">On-site (not in this source)</option></select></div><div><label>Employment</label><select id="type" onchange="setFilter('type',this.value)"><option value="any">Any</option><option value="full_time">Full-time</option><option value="part_time">Part-time</option><option value="contract">Contract</option><option value="internship">Internship</option></select></div><div><label>Minimum listed annual pay</label><select id="salary" onchange="setFilter('salary',this.value)"><option value="0">Any / undisclosed</option><option value="40000">$40,000+</option><option value="60000">$60,000+</option><option value="80000">$80,000+</option><option value="100000">$100,000+</option></select></div><div><label>Experience</label><select id="level" onchange="setFilter('level',this.value)"><option value="any">Any</option><option value="entry">Entry-level titles</option></select></div></div><p class="note" id="status">${loading?'Fetching live postings…':error?esc(error):searched?`${filtered().length} matches from ${jobs.length} fetched postings`:'Run a search to begin.'}</p><div id="results">${filtered().map((j)=>jobCard(j,jobs.indexOf(j))).join('')|| (searched&&!loading?'<div class="empty">No matches. Try broader keywords or filters.</div>':'')}</div>`;}
 
-if(t==='NOVA AI'){h=hqPanel()+(hqChannel==='meeting'?'<button class="action" onclick="hqDiscussOpen()">Discuss with team</button>':'')+`<div class="hq-conversation" aria-live="polite">${novaAiRender()}</div><div class="hq-composer"><label for="novaAiInput">Message ${esc(hqName())}</label><textarea id="novaAiInput" maxlength="5000" rows="3" placeholder="Ask a question or assign a task…"></textarea><button class="action" onclick="novaAiSend()" ${novaAiBusy?'disabled':''}>Send message →</button>${novaAiBusy?'<button class="action secondary" onclick="novaAiCancel()">Cancel generation</button>':''}</div><details class="hq-tools"><summary>Tools and advanced actions</summary><button class="action secondary" onclick="novaNewConversation()">New conversation</button>${novaApprovalDesk()}<button class="action secondary" onclick="novaPaste('novaAiInput')">Paste</button><button class="action secondary" onclick="show('Security Lab')">Open Security Lab</button></details>`;}
+if(t==='NOVA AI'){h=hqPanel()+(hqChannel==='meeting'?'<button class="action" onclick="hqDiscussOpen()">Discuss with team</button>':'')+`<div class="hq-conversation" aria-live="polite">${novaAiRender()}</div><div class="hq-composer"><label for="novaAiInput">Message ${esc(hqName())}</label><textarea id="novaAiInput" maxlength="5000" rows="3" placeholder="Ask a question or assign a task…"></textarea><button class="action" onclick="novaAiSend()" ${novaAiBusy&&!hqDiscussion.active?'disabled':''}>Send message →</button>${hqDiscussion.active?'<button class="action secondary" onclick="hqDiscussionStop()">Stop discussion</button>':novaAiBusy?'<button class="action secondary" onclick="novaAiCancel()">Cancel generation</button>':''}</div><details class="hq-tools"><summary>Tools and advanced actions</summary><button class="action secondary" onclick="novaNewConversation()">New conversation</button>${novaApprovalDesk()}<button class="action secondary" onclick="novaPaste('novaAiInput')">Paste</button><button class="action secondary" onclick="show('Security Lab')">Open Security Lab</button></details>`;}
 
 if(t==='Autopilot'){const st=apStats();h=`<h1>NOVA Autopilot</h1><p class="note">Local-first campaign assistant. Searches existing providers, scores jobs, drafts editable materials and queues applications for your review. No automatic submissions.</p><div class="item"><div class="name">${st.ready} awaiting review · ${st.approved} approved · ${st.submitted} confirmed submitted</div><div class="meta">${st.today}/${apSettings.dailyLimit} approved today · ${apQueue.length} total queued · ${st.interviews} interviews</div></div><h2>Campaign settings</h2><div class="autopilot-grid"><div><label>Minimum match score</label><input id="apMin" type="number" min="0" max="100" value="${apSettings.minimumScore}"></div><div><label>Daily approval limit</label><input id="apLimit" type="number" min="1" max="50" value="${apSettings.dailyLimit}"></div></div><label>Job search keyword</label><input id="apQuery" value="${attr(apSettings.keyword)}" placeholder="help desk"><label>Location</label><input id="apLocation" value="${attr(apSettings.location)}" placeholder="Columbus, OH"><label>Job source</label><select id="apProvider"><option value="remotive">Remotive (no key)</option><option value="adzuna">Adzuna (requires key)</option><option value="usajobs">USAJOBS (requires key)</option></select><p><button class="action" onclick="apDiscover()">Discover and score jobs</button><button class="action secondary" onclick="apSaveSettings()">Save settings</button></p><p class="note" id="apMessage">${esc(apMessage)}</p><h2>Resume Intelligence</h2><p class="note">Import PDF, DOCX or TXT using Android's document picker. Extraction is local. Check all details before using them in applications.</p><button class="action secondary" onclick="apImportResume()">Import resume</button><button class="action secondary" onclick="apClearResume()">Clear imported resume</button><p class="note" id="apResumeMessage">${esc(apResumeMessage)}</p><label>Imported resume (editable; not yet verified)</label><textarea id="apResumeText" rows="7" placeholder="Import or paste your resume here">${esc(apResumeText)}</textarea><button class="action secondary" onclick="apSaveResumeText()">Save imported text locally</button><button class="action secondary" onclick="apUseResumeForProfile()">Copy into verified profile for review</button><h2>Verified profile for drafts</h2><p class="note">Enter only skills and experience you can substantiate. No invented qualifications; drafts require review.</p><label>Full name</label><input id="apName" value="${attr(apProfile.name)}" placeholder="Your name"><label>Verified experience and skills</label><textarea id="apExperience" rows="4" placeholder="Describe real experience, skills, and achievements">${esc(apProfile.experience)}</textarea><label>Contact details for draft (optional)</label><input id="apContact" value="${attr(apProfile.contact)}" placeholder="Email / phone"><button class="action secondary" onclick="apSaveProfile()">Save draft profile locally</button><h2>Approval queue</h2>${apQueue.length?apQueue.map((a,i)=>`<div class="autopilot-row"><div class="name">${esc(a.title)}</div><div class="meta">${esc(a.company)} · ${esc(a.location)} · ${esc(a.provider)} · Match ${a.match}%</div><span class="autopilot-status">${esc(a.status)}</span><p class="note">${esc(a.reason)}</p><div class="autopilot-controls"><button class="action secondary" onclick="apDraft(${i})">Draft letter</button><button class="action secondary" onclick="apOpen(${i})">Open posting</button>${a.status==='Review'?`<button class="action" onclick="apApprove(${i})">Approve</button>`:''}${a.status==='Approved'?`<button class="action" onclick="apConfirmSubmitted(${i})">Confirm submitted</button>`:''}${a.status==='Submitted'?`<button class="action" onclick="apInterview(${i})">Mark interview</button>`:''}<button class="action secondary" onclick="apRemove(${i})">Remove</button></div>${apDraftIndex===i?`<div class="autopilot-draft">${esc(apLetter(a))}</div><button class="action secondary" onclick="apCopyDraft(${i})">Copy draft</button>`:''}</div>`).join(''):'<div class="empty">No queued applications yet. Discover jobs to begin.</div>'}`;}
 if(t==='BugHunter'){h=`<h1>Security · HackerOne</h1><button class="action" onclick="show('Security Lab')">Open Security Lab</button><button class="action secondary" onclick="show(&quot;Audit&quot;)">Authorized audits</button><p class="note">HackerOne program discovery requires configured credentials. Scope and reward eligibility must be checked on the official page.</p><button class="action" onclick="loadPrograms()">Load HackerOne programs</button><button class="action secondary" onclick="novaH1BatchStart()">Research next 5</button><p><input id="novaH1Filter" placeholder="Filter loaded programs" oninput="novaH1FilterChanged(this.value)" value="${attr(novaH1Filter)}"></p><div class="item"><strong>Saved investigations</strong>${novaH1SavedHtml()}</div><p class="note">${esc(providerError)}</p>${programs.map((b,i)=>({b,i})).filter(x=>x.b.name.toLowerCase().includes(novaH1Filter.toLowerCase())).map(({b,i})=>novaH1Card(b,i)).join('')}<label>Program name</label><input id="bn" placeholder="Program name"><label>Official program URL</label><input id="bu" placeholder="https://..."><button class="action" onclick="addBounty()">Save program</button>`+bounties.map((b,i)=>`<div class="item"><div class="name">${esc(b.name)}</div><div class="meta">${esc(b.url)}</div><button class="action" onclick="openUrl('${encodeURIComponent(b.url)}')">Official scope</button><button class="action secondary" onclick="removeBounty(${i})">Remove</button></div>`).join('')}
@@ -548,18 +548,72 @@ function hqDiscussOpen(){
 function hqDiscussClose(){
  document.getElementById('hqDiscussModal')?.remove();
 }
+
+/* NOVA_HQ_DISCUSSION_PROMPT_V2 */
+/* NOVA_HQ_DISCUSSION_STOP_V2 */
+function hqDiscussionStop(){
+ if(!hqDiscussion.active)return;
+ hqDiscussion.stopRequested=true;
+ hqDiscussion.active=false;
+ hqDiscussion.ownerQueue=[];
+ hqMeetingActive=false;
+ if(novaAiBusy){
+  novaAiCancel();
+ }else{
+  novaAiMessages.push({role:'NOVA',text:'Team discussion stopped by owner.'});
+  hqSave();
+  show('NOVA AI');
+ }
+}
+
+function hqDiscussionPrompt(speaker){
+ const d=hqDiscussion;
+ const history=novaAiMessages
+  .slice(d.startIndex)
+  .filter(m=>['You','NOVA','ECLIPSE'].includes(m.role))
+  .slice(-8)
+  .map(m=>m.role+': '+String(m.text).slice(0,300))
+  .join('\n\n');
+
+ const next=d.turns+1;
+ const last=!!d.resolving;
+ const role=speaker==='ECLIPSE'
+  ? 'You are Eclipse, the security researcher. Challenge assumptions and identify risks.'
+  : 'You are NOVA, the team manager. Integrate evidence, assess alternatives, and coordinate the discussion.';
+
+ return [
+  'NOVA HQ — private team discussion.',
+  role,
+  'The owner assigned this topic: '+d.topic,
+  d.resolving
+   ? 'This is NOVA\'s closing resolution after '+d.limit+' agent responses.'
+   : 'This is agent response '+next+' of '+d.limit+'.',
+  'Stay on topic. Respond to the other agent rather than repeating earlier statements.',
+  'Distinguish facts from assumptions. Do not invent tool results or claim actions were performed.',
+  'No tools, security tests, external requests, or job applications are authorized by this discussion.',
+  last
+   ? 'FINAL RESPONSE: Give a concise resolution with agreements, disagreements, remaining uncertainties, and recommended next steps. Do not force consensus.'
+   : 'Advance the reasoning with a concrete observation, question, or challenge. Keep the response concise.',
+  d.lastOwnerInput
+   ? 'OWNER MESSAGE — respond to this first: '+d.lastOwnerInput
+   : '',
+  'Conversation transcript:\n'+(history||'(Discussion beginning)'),
+  'Write only your contribution as '+speaker+'.'
+ ].join('\n\n').slice(0,3100);
+}
+
 function hqDiscussStart(){
  const topic=document.getElementById('hqDiscussTopic')?.value.trim();
  const limit=Number(document.getElementById('hqDiscussLimit')?.value);
  if(!topic){alert('Enter a discussion topic');return}
  if(![4,6,10].includes(limit))return;
- if(hqChannel!=='meeting'||novaAiBusy)return;
+ if(hqChannel!=='meeting'||novaAiBusy||hqDiscussion.active)return;
  if(!window.Nova||typeof Nova.novaGenerate!=='function'){
   alert('Native AI engine unavailable');
   return;
  }
  hqDiscussClose();
- hqDiscussion={active:true,topic,limit,turns:0,stopRequested:false,resolving:false};
+ hqDiscussion={active:true,topic,limit,turns:0,stopRequested:false,resolving:false,startIndex:novaAiMessages.length,ownerQueue:[]};
  hqMeetingActive=false;
  hqSpeaker='NOVA';
  novaAiMessages.push({role:'You',text:topic});
@@ -569,8 +623,7 @@ function hqDiscussStart(){
  novaAiStalled=false;
  const id=++novaAiRequest;
  novaAiWatch(id);
- const prompt=hqContext(topic,'NOVA')+
-  '\\n\\nDISCUSSION ROUND 1: Define the problem, identify what is known, and invite Eclipse to examine a specific question. Do not claim any tools were executed.';
+ const prompt=hqDiscussionPrompt('NOVA');
  try{
   Nova.novaGenerate(prompt.slice(0,3100),id);
  }catch(e){
@@ -661,10 +714,20 @@ function novaInvestigationPrompt(message){
  return context.join('\n').slice(0,3000);
 }
 function novaAiSend(){
- if(novaAiBusy)return;
  const field=document.getElementById('novaAiInput');
  const message=field?field.value.trim():'';
- if(!message)return;
+ if(hqDiscussion.active && hqChannel==='meeting'){
+  if(!message)return;
+  if(!Array.isArray(hqDiscussion.ownerQueue))
+   hqDiscussion.ownerQueue=[];
+  hqDiscussion.ownerQueue.push(message);
+  novaAiMessages.push({role:'You',text:message});
+  hqSave();
+  field.value='';
+  show('NOVA AI');
+  return;
+ }
+ if(novaAiBusy||!message)return;
  if(hqRoute(message))return;
  if(!window.Nova||typeof Nova.novaGenerate!=='function'){alert('Native engine unavailable');return;}
  const appContext=novaPendingContext;
@@ -684,9 +747,10 @@ if(!novaPendingContext && !novaInvestigation){hqSpeaker=hqChannel==='eclipse'?'E
  try{Nova.novaGenerate(built.prompt,id)}catch(e){novaAiStopWatchdog();novaAiBusy=false;novaDebugPending=null;novaAiMessages.push({role:'NOVA',text:'Engine error: '+String(e)});}
  show('NOVA AI');
 }
-function novaAiCancel(){if(!novaAiBusy||novaAiCancelRequested)return;novaAiCancelRequested=true;try{if(typeof Nova!=="undefined"&&Nova.novaCancelGeneration)Nova.novaCancelGeneration();else throw Error('Native cancellation unavailable');}catch(e){novaAiCancelRequested=false;alert('Cancellation could not be requested: '+String(e));}show('NOVA AI');}
+function novaAiCancel(){if(!novaAiBusy||novaAiCancelRequested)return;if(hqDiscussion.active){hqDiscussion.stopRequested=true;hqDiscussion.active=false;}hqMeetingActive=false;novaAiCancelRequested=true;try{if(typeof Nova!=="undefined"&&Nova.novaCancelGeneration)Nova.novaCancelGeneration();else throw Error('Native cancellation unavailable');}catch(e){novaAiCancelRequested=false;alert('Cancellation could not be requested: '+String(e));}show('NOVA AI');}
 function novaAiResult(id,ok,message){
  if(id!==novaAiRequest)return;
+ const wasCancelled=novaAiCancelRequested;
  novaAiStopWatchdog();novaAiCancelRequested=false;novaAiStalled=false;
  if(novaDebugPending&&novaDebugPending.id===id){
   const p=novaDebugPending;
@@ -699,8 +763,98 @@ function novaAiResult(id,ok,message){
  const raw=String(message||'');
  const cleaned=ok?novaCleanAnswer(raw):'';
  const visible=ok?(cleaned||'NOVA produced no visible answer. The model may have spent its output budget on reasoning; try a shorter prompt.'):('Engine error: '+raw);
+ if(hqDiscussion.stopRequested){
+  hqDiscussion.active=false;
+  hqDiscussion.stopRequested=false;
+  hqDiscussion.ownerQueue=[];
+  hqMeetingActive=false;
+  show('NOVA AI');
+  return;
+ }
  novaAiMessages.push({role:hqSpeaker,text:visible});hqSave();
- if(ok&&hqMeetingActive&&hqChannel==='meeting'&&hqMeetingTurns===0){hqMeetingTurns=1;hqSpeaker='ECLIPSE';novaAiBusy=true;const nextId=++novaAiRequest;novaAiWatch(nextId);try{Nova.novaGenerate(hqContext('NOVA just spoke. Eclipse: add one distinct, practical perspective or challenge, without inventing any completed work.', 'ECLIPSE'),nextId)}catch(e){novaAiStopWatchdog();novaAiBusy=false;novaAiMessages.push({role:'ECLIPSE',text:'Unable to join: '+String(e)});hqMeetingActive=false}show('NOVA AI');return}
+ /* NOVA_LIVE_TEAM_V3 */
+ if(hqDiscussion.active){
+  const d=hqDiscussion;
+
+  if(!ok||wasCancelled||!cleaned){
+   d.active=false;
+   d.ownerQueue=[];
+   hqMeetingActive=false;
+   show('NOVA AI');
+   return;
+  }
+
+  if(d.resolving){
+   const late=Array.isArray(d.ownerQueue)
+    ?d.ownerQueue.splice(0):[];
+   if(late.length){
+    d.lastOwnerInput=late.join('\n');
+    hqSpeaker='NOVA';
+    novaAiBusy=true;
+    const followId=++novaAiRequest;
+    novaAiWatch(followId);
+    try{
+     const followPrompt=hqDiscussionPrompt('NOVA');
+     d.lastOwnerInput='';
+     Nova.novaGenerate(followPrompt.slice(0,3100),followId);
+    }catch(e){
+     novaAiStopWatchdog();
+     novaAiBusy=false;
+     d.active=false;
+     d.resolving=false;
+     novaAiMessages.push({
+      role:'NOVA',
+      text:'Owner follow-up interrupted: '+String(e)
+     });
+     hqSave();
+    }
+    show('NOVA AI');
+    return;
+   }
+   d.active=false;
+   d.resolving=false;
+   hqMeetingActive=false;
+   show('NOVA AI');
+   return;
+  }
+
+  d.turns++;
+
+  const queued=Array.isArray(d.ownerQueue)
+   ?d.ownerQueue.splice(0):[];
+
+  if(queued.length)
+   d.lastOwnerInput=queued.join('\n');
+
+  if(d.turns>=d.limit){
+   d.resolving=true;
+   hqSpeaker='NOVA';
+  }else{
+   hqSpeaker=hqSpeaker==='NOVA'?'ECLIPSE':'NOVA';
+  }
+
+  novaAiBusy=true;
+  const nextId=++novaAiRequest;
+  novaAiWatch(nextId);
+
+  try{
+   let prompt=hqDiscussionPrompt(hqSpeaker);
+   d.lastOwnerInput='';
+   Nova.novaGenerate(prompt.slice(0,3100),nextId);
+  }catch(e){
+   novaAiStopWatchdog();
+   novaAiBusy=false;
+   d.active=false;
+   d.resolving=false;
+   novaAiMessages.push({
+    role:hqSpeaker,
+    text:'Discussion interrupted: '+String(e)
+   });
+   hqSave();
+  }
+  show('NOVA AI');
+  return;
+ }
  hqMeetingActive=false;novaUnifiedNext='review';show('NOVA AI');
 }
 
