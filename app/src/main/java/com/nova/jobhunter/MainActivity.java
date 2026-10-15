@@ -34,6 +34,7 @@ public class MainActivity extends Activity {
  private static native void nativeCancelGeneration();
 
  // ECLIPSE_V441_AI_COPILOT: local GGUF only; returns text, never invokes an HTTP tool.
+  // ECLIPSE_V442_CHAT_FLOW: UI is chat-first; network requests still need native approval.
  private final java.util.concurrent.atomic.AtomicInteger eclipseV441AiActive=new java.util.concurrent.atomic.AtomicInteger(0);
  private final java.util.concurrent.atomic.AtomicBoolean generationBusy = new java.util.concurrent.atomic.AtomicBoolean(false);
  private WebView web;
@@ -648,7 +649,9 @@ web.addJavascriptInterface(new Bridge(),"Nova");web.setWebViewClient(new WebView
     String answer=nativeGenerate(model.getAbsolutePath(),prompt);
     if(answer==null||answer.startsWith("NOVA_ENGINE_ERROR:"))throw new Exception(answer==null?"Empty native response":answer);
     reply("eclipseV441AiResult",id,true,answer);
-   }catch(Exception e){reply("eclipseV441AiResult",id,false,e.getMessage()==null?"Local inference failed":e.getMessage());}
+     if(!novaForeground)runOnUiThread(()->copilotNotify("Eclipse finished thinking","Open Live Workbench to review the result"));
+   }catch(Exception e){reply("eclipseV441AiResult",id,false,e.getMessage()==null?"Local inference failed":e.getMessage());
+     if(!novaForeground)runOnUiThread(()->copilotNotify("Eclipse needs attention","Open Live Workbench to review the error"));}
    finally{eclipseV441AiActive.compareAndSet(id,0);generationBusy.set(false);}
   },"eclipse-v441-local-ai").start();
  }

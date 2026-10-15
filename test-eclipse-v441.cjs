@@ -19,7 +19,7 @@ test('native root, version and Android viewport avoid overlapping OS bars',()=>{
  assert.match(java,/ECLIPSE_V441_SAFE_ROOT/);assert.match(java,/setContentView\(eclipseV441SafeRoot\)/);
  assert.match(java,/WindowInsets\.Type\.ime\(\)/);assert.doesNotMatch(java,/web\.setOnApplyWindowInsetsListener/);
  assert.match(html,/nova-eclipse-v441-safe-layout/);assert.match(html,/body\{padding-top:0!important;padding-bottom:0!important/);
- assert.match(manifest,/windowSoftInputMode="adjustResize"/);assert.match(manifest,/android:label="NOVA Board"/);assert.match(gradle,/versionCode 7/);
+ assert.match(manifest,/windowSoftInputMode="adjustResize"/);assert.match(manifest,/android:label="NOVA Board"/);assert.match(gradle,/versionCode (?:7|8)/);
 });
 test('workbench has local-model Eclipse assistant with no approval shortcut',()=>{
  const x=mock();x.run("show('Eclipse Live')");const s=x.el('content').innerHTML;
